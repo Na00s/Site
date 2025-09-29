@@ -1,11 +1,8 @@
 main:
-  - title: "Research"
-    url: /research/
+  - title: "Curriculum Vitae"
+    url: /assets/docs/CV_Ali.pdf
+  - title: "Entropy (Blog & Notes)"
+    url: /blog/
   - title: "Projects"
     url: /projects/
-  - title: "Publications"
-    url: /publications/
-  - title: "Blog"
-    url: /blog/
-  - title: "About"
-    url: /about/
+
