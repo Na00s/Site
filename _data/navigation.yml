@@ -1,0 +1,11 @@
+main:
+  - title: "Research"
+    url: /research/
+  - title: "Projects"
+    url: /projects/
+  - title: "Publications"
+    url: /publications/
+  - title: "Blog"
+    url: /blog/
+  - title: "About"
+    url: /about/

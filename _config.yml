@@ -1,0 +1,67 @@
+title: "Ali Janati"
+name: "Ali Janati"
+description: "Senior AI Scientist. Efficient training and inference for LLMs. Interpretability. Multimodal systems."
+url: "https://alijanati.com"
+baseurl: ""
+
+remote_theme: "mmistakes/minimal-mistakes"
+plugins:
+  - jekyll-include-cache
+
+markdown: kramdown
+highlighter: rouge
+permalink: /:categories/:title/
+paginate: 5
+paginate_path: "/blog/page:num/"
+timezone: "America/Los_Angeles"
+
+author:
+  name: "Ali Janati"
+  avatar: "/assets/images/avatar.jpg"
+  bio: "Senior AI Scientist. Conversational systems, Llama family, quantization, ZeRO-3, FSDP."
+  location: "Bay Area, CA"
+  links:
+    - label: "X"
+      icon: "fab fa-x-twitter"
+      url: "https://twitter.com/gradientszn"
+    - label: "GitHub"
+      icon: "fab fa-github"
+      url: "https://github.com/Na00s"
+    - label: "LinkedIn"
+      icon: "fab fa-linkedin"
+      url: "https://www.linkedin.com/in/ali-janati/"
+    - label: "Google Scholar"
+      icon: "ai ai-google-scholar"
+      url: "https://scholar.google.com/"
+    - label: "Email"
+      icon: "fas fa-envelope"
+      url: "mailto:contact@alijanati.com"
+
+theme_skin: "default"
+search: true
+breadcrumbs: true
+breadcrumbs_home_label: "Home"
+
+collections:
+  projects:
+    output: true
+    permalink: /projects/:path/
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: single
+      author_profile: true
+      read_time: true
+      related: true
+      share: false
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: single
+      author_profile: true
+
+minimal_mistakes_skin: "default"
