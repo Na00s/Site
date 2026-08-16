@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Llama 3.1 8B with a hand-written KV cache · Ali Janati</title>
+  <meta name="description" content="Reimplementing Llama 3.1 8B in plain PyTorch: grouped-query attention by broadcasting, RoPE with a position offset, and a KV cache written by hand.">
+  <link rel="canonical" href="https://alijanati.com/articles/llama-3-1-8b-kv-cache/">
+  <meta name="author" content="Ali Janati">
+  <meta name="theme-color" content="#f6f1e6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#191410" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Llama 3.1 8B with a hand-written KV cache">
+  <meta property="og:description" content="Grouped-query attention by broadcasting, RoPE with a position offset, and a KV cache from scratch.">
+  <meta property="og:image" content="https://alijanati.com/assets/images/og.png">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preload" href="/assets/fonts/fraunces-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/newsreader-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-head">
+    <div class="wrap bar">
+      <a class="wordmark" href="/">Ali Janati<span class="dot">.</span></a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="/#papers">Papers</a>
+        <a href="/#articles">Articles</a>
+        <a href="/#open-source">Open source</a>
+        <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Light / dark">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 2v14a7 7 0 0 1 0-14z" fill="currentColor"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <header class="article-head">
+      <p class="crumbs"><a href="/#articles">Articles</a> / Llama 3.1 8B</p>
+      <h1>Llama 3.1 8B with a hand-written KV cache</h1>
+      <p class="meta">Aug 2026 &middot; Code: <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/llama_3.1_8B/model.py" target="_blank" rel="noopener">llama_3.1_8B/model.py</a></p>
+    </header>
+
+    <article class="article-body">
+      <p>Llama 3.1 8B is the closest thing the field has to a reference decoder: 32 layers, hidden size 4096, grouped-query attention with 32 query heads over 8 KV heads, SwiGLU, RMSNorm, RoPE at theta 500,000, vocabulary 128,256. That makes it the right model to attach the one piece of inference machinery everyone uses and few people write by hand: the KV cache. Mine is the only model in the repository that carries one, and it is about twenty lines.</p>
+
+      <h2>Grouped queries without repeat_kv</h2>
+      <p>The usual implementation repeats each KV head four times to match the 32 query heads. I skip the copy: reshape queries to five dimensions, grouped by KV head, leave keys and values with a singleton group axis, and let broadcasting do the rest. No <code>repeat_interleave</code>, no materialized copies of K and V, and the grouping is visible in the shapes.</p>
+      <pre><code>repeat_factor = num_attention_heads // num_key_value_heads    # 32 // 8 = 4
+q = q.reshape(B, num_key_value_heads, repeat_factor, T, head_size)
+k = k.reshape(B, num_key_value_heads, 1, T, head_size)
+v = v.reshape(B, num_key_value_heads, 1, T, head_size)
+scores = q @ k.transpose(-1, -2)    # B, n_kv, 4, T, T via broadcasting</code></pre>
+      <p class="code-cap">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/llama_3.1_8B/model.py" target="_blank" rel="noopener">llama_3.1_8B/model.py</a></p>
+
+      <h2>RoPE has to know where it is</h2>
+      <p>A cache changes positional encoding in one subtle way: when the model processes token 4097 alone, its rotary angle must correspond to position 4097, not position 0. So the frequency table takes the past length as an offset, and everything else stays vanilla RoPE.</p>
+      <pre><code>@staticmethod
+def get_rope_params(theta, length, head_dim, past_len=0):
+    freq = theta ** ((-torch.arange(0, head_dim, 2)) / head_dim).unsqueeze(0)
+    pos = torch.arange(past_len, past_len + length).unsqueeze(1)   # T, 1
+    angles = pos * freq                                            # T, head_dim//2
+    return torch.cos(angles), torch.sin(angles)</code></pre>
+      <p class="code-cap"><a href="https://github.com/Na00s/PyTorch-Playground/blob/main/llama_3.1_8B/model.py" target="_blank" rel="noopener">llama_3.1_8B/model.py</a></p>
+
+      <h2>The cache itself is concatenation</h2>
+      <p>Each attention layer receives its past keys and values, concatenates the new ones along the time axis, attends over the joined sequence, and hands the joined tensors back as the new past. The score matrix goes rectangular, new queries against all keys, so the mask does too.</p>
+      <pre><code>past_length = 0 if past_k is None else past_k.size(2)
+cos, sin = self.get_rope_params(rope_theta, T, head_size, past_len=past_length)
+q, k = self.apply_rope(q, cos, sin), self.apply_rope(k, cos, sin)
+
+if past_k is not None:
+    k_all = torch.cat([past_k, k], dim=2)    # B, n_kv, T + past, head_size
+    v_all = torch.cat([past_v, v], dim=2)
+else:
+    k_all, v_all = k, v
+
+scores = q @ k_all.transpose(-1, -2)         # B, n_kv, 4, T, T + past
+mask = torch.tril(torch.ones(T, T + past_length, device=x.device))
+scores = scores.masked_fill(mask == 0, float("-inf"))
+scores = F.softmax(scores / math.sqrt(head_size), dim=-1)
+ctx = scores @ v_all
+
+present = (k_all, v_all) if use_cache else None
+return x, present</code></pre>
+      <p class="code-cap">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/llama_3.1_8B/model.py" target="_blank" rel="noopener">the attention forward</a></p>
+      <p>The model's forward threads a list of per-layer pasts down the stack and collects the presents on the way back up. That is the entire mechanism behind fast autoregressive decoding: prefill once, then each step pays for one token of attention instead of the whole sequence.</p>
+
+      <h2>Training details that matter</h2>
+      <p>The loss does the causal shift explicitly, logits against next tokens, with <code>ignore_index=-100</code> for padding, and the SwiGLU feed-forward is a one-liner: <code>fc3(silu(fc2(x)) * fc1(x))</code>. The config carries Llama 3.1's long-context RoPE scaling fields, the 8x factor and the low and high frequency cutoffs; this implementation keeps rotary vanilla and treats the frequency-dependent scaling as a documented extension, the same config-as-map convention as the rest of the repository. The file also keeps hand-written RMSNorm and LayerNorm classes at the bottom as reference implementations, spare parts for teaching.</p>
+
+      <footer class="article-foot">
+        <a href="/#articles">&larr; All articles</a>
+        <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/llama_3.1_8B/model.py" target="_blank" rel="noopener">Full code &rarr;</a>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <div class="colophon">
+        <span>&copy; 2026 Ali Janati</span>
+        <span><a href="/">alijanati.com</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>

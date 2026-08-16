@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gemma 3 270M, line by line · Ali Janati</title>
+  <meta name="description" content="Reimplementing Gemma 3 270M in plain PyTorch: 5:1 sliding-to-full attention, dual RoPE frequencies, QK-norm, sandwich normalization, and GeGLU.">
+  <link rel="canonical" href="https://alijanati.com/articles/gemma-3-270m/">
+  <meta name="author" content="Ali Janati">
+  <meta name="theme-color" content="#f6f1e6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#191410" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Gemma 3 270M, line by line">
+  <meta property="og:description" content="Dual RoPE frequencies, QK-norm, sandwich normalization, and GeGLU in a model small enough to read whole.">
+  <meta property="og:image" content="https://alijanati.com/assets/images/og.png">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preload" href="/assets/fonts/fraunces-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/newsreader-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-head">
+    <div class="wrap bar">
+      <a class="wordmark" href="/">Ali Janati<span class="dot">.</span></a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="/#papers">Papers</a>
+        <a href="/#articles">Articles</a>
+        <a href="/#open-source">Open source</a>
+        <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Light / dark">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 2v14a7 7 0 0 1 0-14z" fill="currentColor"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <header class="article-head">
+      <p class="crumbs"><a href="/#articles">Articles</a> / Gemma 3 270M</p>
+      <h1>Gemma 3 270M, line by line</h1>
+      <p class="meta">Aug 2026 &middot; Code: <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/gemma_270M/model.py" target="_blank" rel="noopener">gemma_270M/model.py</a></p>
+    </header>
+
+    <article class="article-body">
+      <p>Gemma 3's 270M variant is the most instructive model in its family precisely because it is small: 18 layers, embedding dimension 640, and a design where almost every recent architecture idea appears once. Sliding-window attention five layers out of six, two RoPE frequency bases, QK-norm, normalization on both sides of every sublayer, and a GELU-gated feed-forward. My reimplementation is 252 lines of plain PyTorch, and this article walks the parts that differ from a vanilla decoder.</p>
+
+      <p>Two config choices are worth noticing before any code. The vocabulary is enormous for the model size, 262,144 entries at dimension 640, so most of the parameters live in the embedding table; the file ends by printing the total parameter count with and without tying the output head to the embedding, which is the difference the release cares about at this scale. And the heads are wide: 4 query heads of dimension 256 each with a single KV head, so attention operates in a space wider than the residual stream itself.</p>
+
+      <h2>One attention module, two personalities</h2>
+      <p>Every sixth layer is a full-attention layer with RoPE base 1,000,000; the five layers between are sliding-window layers, window 512, with RoPE base 10,000. Which personality a layer gets is decided by the config's <code>layer_type</code> tuple, and inside the module it comes down to picking a theta and a mask.</p>
+      <pre><code>if self.layer_type == "sliding_attention":
+    theta = self.config.rope_local_base          # 10_000
+    offset = -self.config.sliding_window
+    mask = torch.triu(torch.tril(torch.ones((T, T), device=x.device)),
+                      diagonal=offset)
+elif self.layer_type == "full_attention":
+    theta = self.config.rope_base                # 1_000_000
+    mask = torch.tril(torch.ones((T, T), device=x.device))
+
+cos, sin = self.get_rope_params(self.config.head_dim, theta, T, dtype=q.dtype)
+q = self.apply_rope(q, cos, sin)
+k = self.apply_rope(k, cos, sin)</code></pre>
+      <p class="code-cap"><a href="https://github.com/Na00s/PyTorch-Playground/blob/main/gemma_270M/model.py" target="_blank" rel="noopener">gemma_270M/model.py</a></p>
+      <p>The dual base is the interesting design decision: local layers get high-frequency rotations tuned for near context, and the sparse full layers get the long-wavelength base that makes 32k positions distinguishable. Masks are built per forward pass at sequence length T rather than registered as full-context buffers; at a 32,768-token context, a cached full mask is real memory, and the comment in the code says exactly why it is not kept.</p>
+
+      <h2>Attention accumulates in fp32</h2>
+      <p>The model runs in bf16, but scores and softmax happen in float32 before casting back. At head dimension 256 the dot products are long sums, and bf16's 8 bits of mantissa lose real precision there; accumulating in fp32 is the standard fix, made explicit here rather than hidden inside a fused kernel. QK-norm, an RMSNorm over the head dimension, runs on queries and keys before RoPE.</p>
+      <pre><code>attn_scores = q.float() @ k.transpose(-1, -2).float()
+attn_scores = attn_scores / math.sqrt(self.config.head_dim)
+attn_scores = attn_scores.masked_fill(mask == 0, float("-inf"))
+attn_scores = F.softmax(attn_scores, dim=-1)
+attn_scores = attn_scores.to(dtype=self.config.dtype)   # back to bf16</code></pre>
+      <p class="code-cap"><a href="https://github.com/Na00s/PyTorch-Playground/blob/main/gemma_270M/model.py" target="_blank" rel="noopener">gemma_270M/model.py</a></p>
+
+      <h2>Sandwich normalization and GeGLU</h2>
+      <p>Gemma normalizes four times per block: before and after attention, before and after the feed-forward. The whole block is two lines. The feed-forward itself is GeGLU, the GELU-gated variant, where one projection gates the other before the down projection; the rest of my reimplementations use SiLU gating, so the contrast lives in one activation function.</p>
+      <pre><code>def forward(self, x):
+    x = x + self.n2(self.attn(self.n1(x)))
+    x = x + self.n4(self.ffn(self.n3(x)))
+    return x</code></pre>
+      <p class="code-cap">The transformer block, <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/gemma_270M/model.py" target="_blank" rel="noopener">gemma_270M/model.py</a></p>
+      <pre><code>def forward(self, x):
+    x1 = F.gelu(self.w1(x))     # B, T, hidden_dim
+    x2 = self.w2(x)             # B, T, hidden_dim
+    return self.w3(x1 * x2)     # B, T, emb_dim</code></pre>
+      <p class="code-cap">GeGLU feed-forward, condensed, <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/gemma_270M/model.py" target="_blank" rel="noopener">gemma_270M/model.py</a></p>
+
+      <h2>The small print</h2>
+      <p>Two Gemma signatures round it out: token embeddings are scaled by the square root of the embedding dimension on the way in, and a final RMSNorm sits before the output head. Loss is computed in float32. Everything else, pre-norm residual blocks, broadcast grouped queries, a crop-and-sample <code>generate()</code>, follows the same skeleton as the other models in the repository, which is the point: hold the scaffold constant, and each architecture becomes a small diff against the previous one.</p>
+
+      <footer class="article-foot">
+        <a href="/#articles">&larr; All articles</a>
+        <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/gemma_270M/model.py" target="_blank" rel="noopener">Full code &rarr;</a>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <div class="colophon">
+        <span>&copy; 2026 Ali Janati</span>
+        <span><a href="/">alijanati.com</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>

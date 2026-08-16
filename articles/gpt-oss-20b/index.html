@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>gpt-oss-20B: attention and MoE, reimplemented · Ali Janati</title>
+  <meta name="description" content="Reimplementing the interesting parts of gpt-oss-20B in plain PyTorch: alternating sliding-window and full attention, and a 32-expert MoE with clamped SwiGLU.">
+  <link rel="canonical" href="https://alijanati.com/articles/gpt-oss-20b/">
+  <meta name="author" content="Ali Janati">
+  <meta name="theme-color" content="#f6f1e6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#191410" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="gpt-oss-20B: attention and MoE, reimplemented">
+  <meta property="og:description" content="Alternating sliding-window and full attention, and a 32-expert MoE with clamped SwiGLU, in plain PyTorch.">
+  <meta property="og:image" content="https://alijanati.com/assets/images/og.png">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preload" href="/assets/fonts/fraunces-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/newsreader-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-head">
+    <div class="wrap bar">
+      <a class="wordmark" href="/">Ali Janati<span class="dot">.</span></a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="/#papers">Papers</a>
+        <a href="/#articles">Articles</a>
+        <a href="/#open-source">Open source</a>
+        <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Light / dark">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 2v14a7 7 0 0 1 0-14z" fill="currentColor"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <header class="article-head">
+      <p class="crumbs"><a href="/#articles">Articles</a> / gpt-oss-20B</p>
+      <h1>gpt-oss-20B: the attention pattern and the MoE, reimplemented</h1>
+      <p class="meta">Aug 2026 &middot; Code: <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/gpt_oss_20B/model.py" target="_blank" rel="noopener">gpt_oss_20B/model.py</a></p>
+    </header>
+
+    <article class="article-body">
+      <p>gpt-oss-20B is OpenAI's open-weight MoE: 24 layers, 32 experts per layer with 4 active per token, and an attention stack that strictly alternates between sliding-window layers and full-attention layers. This is a components study rather than a full training run: I reimplemented the two places where the architecture deviates from a vanilla decoder, the attention pattern and the expert layer, in plain PyTorch with manual attention.</p>
+
+      <p>The config is copied from the official release, and I kept even the fields this file never reads: 64 query heads over 8 KV heads at head dimension 64, hidden size 2880, vocabulary 201,088, sliding window 128, RoPE theta 150,000, a SwiGLU clamp at 7.0, and the YaRN long-context parameters. A config that mirrors the release is documentation: it tells you exactly what the production model has that the study version does not.</p>
+
+      <h2>Sliding-window attention is one line of masking</h2>
+      <p>Half the layers see the full causal past; the other half see only the last 128 positions. Both are expressed as masks over the same score matrix. The banded mask composes <code>triu</code> and <code>tril</code>: take the lower triangle for causality, then cut everything older than the window.</p>
+      <pre><code>if self.layer_type == "sliding_attention":
+    mask = torch.triu(torch.tril(torch.ones(T, T, device=x.device)),
+                      diagonal=-self.config.sliding_window)
+else:
+    mask = torch.tril(torch.ones(T, T, device=x.device))
+
+scores = q @ k.transpose(-1, -2)          # B, n_kv, repeat, T, T
+scores = scores / math.sqrt(self.config.head_dim)
+scores = scores.masked_fill(mask == 0, float("-inf"))
+scores = F.softmax(scores, dim=-1)</code></pre>
+      <p class="code-cap"><a href="https://github.com/Na00s/PyTorch-Playground/blob/main/gpt_oss_20B/model.py" target="_blank" rel="noopener">gpt_oss_20B/model.py</a></p>
+      <p>The <code>layer_types</code> tuple in the config drives which mask each layer gets, so the alternation is data, not control flow. Grouped queries use the same broadcast trick as the rest of my reimplementations: queries reshaped to a 5-D tensor over 8 KV groups, keys and values left singleton, and matmul broadcasting does the grouping.</p>
+
+      <h2>RoPE in the rotation-matrix convention</h2>
+      <p>Positional encoding is rotary, written here in the rotation-matrix sign convention over interleaved even and odd channels. Frequencies and angles are recomputed per forward pass, which keeps the code stateless and readable.</p>
+      <pre><code>@staticmethod
+def apply_rope(x, cos, sin):
+    x_even = x[..., 0::2]                 # B, T, C//2
+    x_odd  = x[..., 1::2]                 # B, T, C//2
+    u =  x_even * cos + x_odd * sin
+    v = -x_even * sin + x_odd * cos
+    x_rotated = torch.stack([u, v], dim=-1)
+    return x_rotated.flatten(-2)          # B, T, C</code></pre>
+      <p class="code-cap"><a href="https://github.com/Na00s/PyTorch-Playground/blob/main/gpt_oss_20B/model.py" target="_blank" rel="noopener">gpt_oss_20B/model.py</a></p>
+
+      <h2>The expert layer: top-4 routing and a clamped SwiGLU</h2>
+      <p>The router keeps the top 4 of 32 expert logits per token and softmaxes over only those 4, matching the release. gpt-oss bounds its SwiGLU activations; this version applies the clamp to the gated product with the config's limit of 7.0. Dispatch loops over experts and scatters weighted outputs back with <code>index_add_</code>, clarity over throughput.</p>
+      <pre><code>u = self.fc1[expert_id](x_selected)       # tokens routed to this expert
+v = self.fc2[expert_id](x_selected)
+act = F.silu(u) * v
+if self.config.swiglu_limit is not None:
+    act = torch.clamp(act, -self.config.swiglu_limit, self.config.swiglu_limit)
+h = self.fc3[expert_id](act)
+y_flat.index_add_(0, expert_tokens, expert_weights.unsqueeze(1) * h)</code></pre>
+      <p class="code-cap">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/gpt_oss_20B/model.py" target="_blank" rel="noopener">the MoE forward</a></p>
+
+      <h2>What the release adds on top</h2>
+      <p>Three gpt-oss features stay config-only in this study: attention sinks (learned logits that keep early positions attendable in long contexts), YaRN frequency scaling for the 131k context (the <code>rope_factor</code> and beta fields are all present, the RoPE here is vanilla), and mxfp4 quantization of the expert weights (the <code>quant_method</code> and skip-list fields document which modules the release leaves in higher precision). Each is a good exercise on its own; the point of this file is that the skeleton of the model, mask plus router plus clamp, fits in an afternoon of PyTorch.</p>
+
+      <footer class="article-foot">
+        <a href="/#articles">&larr; All articles</a>
+        <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/gpt_oss_20B/model.py" target="_blank" rel="noopener">Full code &rarr;</a>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <div class="colophon">
+        <span>&copy; 2026 Ali Janati</span>
+        <span><a href="/">alijanati.com</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>

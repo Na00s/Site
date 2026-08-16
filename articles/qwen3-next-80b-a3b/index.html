@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Qwen3-Next-80B-A3B from scratch · Ali Janati</title>
+  <meta name="description" content="Reimplementing Qwen3-Next-80B-A3B in plain PyTorch: Gated DeltaNet, gated attention with QK-norm, zero-centered RMSNorm, and a 512-expert mixture-of-experts.">
+  <link rel="canonical" href="https://alijanati.com/articles/qwen3-next-80b-a3b/">
+  <meta name="author" content="Ali Janati">
+  <meta name="theme-color" content="#f6f1e6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#191410" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Qwen3-Next-80B-A3B from scratch">
+  <meta property="og:description" content="Gated DeltaNet, gated attention, and a 512-expert MoE in plain PyTorch.">
+  <meta property="og:image" content="https://alijanati.com/assets/images/og.png">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preload" href="/assets/fonts/fraunces-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/newsreader-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-head">
+    <div class="wrap bar">
+      <a class="wordmark" href="/">Ali Janati<span class="dot">.</span></a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="/#papers">Papers</a>
+        <a href="/#articles">Articles</a>
+        <a href="/#open-source">Open source</a>
+        <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Light / dark">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 2v14a7 7 0 0 1 0-14z" fill="currentColor"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <header class="article-head">
+      <p class="crumbs"><a href="/#articles">Articles</a> / Qwen3-Next-80B-A3B</p>
+      <h1>Qwen3-Next-80B-A3B from scratch: DeltaNet, gated attention, and 512 experts</h1>
+      <p class="meta">Aug 2026 &middot; Code: <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/qwen3-80B-A3B/model.py" target="_blank" rel="noopener">qwen3-80B-A3B/model.py</a></p>
+    </header>
+
+    <article class="article-body">
+      <p>Qwen3-Next-80B-A3B is a hybrid: most of its layers replace softmax attention with Gated DeltaNet, a linear-attention block, and the rest use full attention with an output gate. Sparsity does the heavy lifting. The feed-forward path is a mixture of experts with 512 experts per layer, of which each token activates 10, which is how an 80B-parameter model runs with roughly 3B active parameters per token. I reimplemented the architecture in a single PyTorch file, no <code>transformers</code> import, no fused kernels, to see exactly what computes.</p>
+
+      <p>The config mirrors the official release: 48 layers, hidden size 2048, 16 attention heads over 2 KV heads, head dimension 256, vocabulary 151,936, context length 262,144, RoPE theta 10,000,000. Keeping the real numbers matters. Half the architecture lives in the config.</p>
+
+      <h2>Zero-centered RMSNorm</h2>
+      <p>Qwen3-Next normalizes with a zero-centered variant of RMSNorm: subtract the mean as LayerNorm would, but divide by the root mean square. It is used everywhere in the model, including on queries and keys before RoPE.</p>
+      <pre><code>class ZeroCenteredRMSNorm(nn.Module):
+    def forward(self, x):
+        mean_x = torch.mean(x, dim=-1, keepdim=True)                       # B, T, 1
+        rms_x = torch.sqrt(torch.mean(x**2, dim=-1, keepdim=True)
+                           + self.config.rms_norm_eps)
+        x = ((x - mean_x) / rms_x) * self.gamma
+        return x</code></pre>
+      <p class="code-cap"><a href="https://github.com/Na00s/PyTorch-Playground/blob/main/qwen3-80B-A3B/model.py" target="_blank" rel="noopener">qwen3-80B-A3B/model.py</a></p>
+
+      <h2>Gated attention, and grouped queries by broadcasting</h2>
+      <p>The full-attention layers add a sigmoid gate computed from the input and applied to the attention output before the final projection. QK-norm runs before RoPE. For grouped-query attention I avoid <code>repeat_interleave</code> entirely: reshape queries to five dimensions so that each group of 8 query heads faces a single broadcast KV head.</p>
+      <pre><code>g = torch.sigmoid(self.gate(x))                                # B, T, C
+q, k = self.norm_q(q), self.norm_k(k)
+q, k = self.apply_rope(q, cos, sin), self.apply_rope(k, cos, sin)
+
+repeat_factor = num_attention_heads // num_key_value_heads     # 16 // 2 = 8
+q = q.reshape(B, num_key_value_heads, repeat_factor, T, head_dim)
+k = k.reshape(B, num_key_value_heads, 1, T, head_dim)
+v = v.reshape(B, num_key_value_heads, 1, T, head_dim)
+
+scores = q @ k.transpose(-1, -2) / math.sqrt(head_dim)         # broadcast over dim 2
+scores = scores.masked_fill(mask == 0, float('-inf'))
+ctx = F.softmax(scores, dim=-1) @ v
+ctx = ctx * g
+x = self.proj_o(ctx)</code></pre>
+      <p class="code-cap">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/qwen3-80B-A3B/model.py" target="_blank" rel="noopener">GatedAttention.forward</a></p>
+
+      <h2>Gated DeltaNet</h2>
+      <p>The linear-attention blocks project q, k, v through short per-head convolutions (kernel size 4), apply SiLU, and L2-normalize queries and keys. Two learned projections, alpha and beta, gate a delta update computed from the value and the query-key difference; the result is normalized and gated again before the output projection.</p>
+      <pre><code>q, k = F.silu(q), F.silu(k)
+q = F.normalize(q, p=2, dim=-1, eps=1e-6)
+k = F.normalize(k, p=2, dim=-1, eps=1e-6)
+v = F.silu(v)
+
+alpha = self.proj_alpha(x)          # per-token gates
+beta  = self.proj_beta(x)
+
+delta = alpha * v + beta * (q - k)  # the delta update
+x = self.norm_delta(delta)
+x = g * x
+x = self.proj_o(x)</code></pre>
+      <p class="code-cap">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/qwen3-80B-A3B/model.py" target="_blank" rel="noopener">GatedDeltaNet.forward</a></p>
+      <p>This is the static form of the delta rule: the update is computed per position, with the recurrent state accumulation left out. Writing it this way first makes the role of each projection legible before the recurrence complicates the picture.</p>
+
+      <h2>512 experts, 10 active</h2>
+      <p>The router produces logits over 512 experts, keeps the top 10 per token, and normalizes with a softmax over only those 10, matching the release. Dispatch is a loop over experts with <code>index_add_</code> scattering weighted expert outputs back to token positions. A vectorized dispatch would be faster; the loop is the version you can read.</p>
+      <pre><code>gate_logits, gate_idxs = router_logits.topk(num_experts_per_tok, dim=-1)
+gate_probs = F.softmax(gate_logits, dim=-1)      # over the selected 10 only
+
+y_flat = torch.zeros_like(x_flat)
+for expert_id in range(num_experts):
+    mask = (gate_idxs_flat == expert_id)
+    if not mask.any():
+        continue
+    expert_tokens  = token_indices[mask]
+    expert_weights = gate_probs_flat[mask]
+    x_selected = x_flat[expert_tokens]
+    act = F.silu(self.fc1[expert_id](x_selected)) * self.fc2[expert_id](x_selected)
+    h = self.fc3[expert_id](act)
+    y_flat.index_add_(0, expert_tokens, expert_weights.unsqueeze(1) * h)</code></pre>
+      <p class="code-cap">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/qwen3-80B-A3B/model.py" target="_blank" rel="noopener">the MoE forward</a></p>
+
+      <h2>What this study version simplifies</h2>
+      <p>The released model interleaves the two block types, roughly three DeltaNet layers for each attention layer; my file runs the 24 DeltaNet blocks and then the 24 gated-attention blocks as two stacks, keeping <code>full_attention_interval</code> in the config for the faithful wiring. The config also carries the shared-expert size, the auxiliary router loss coefficient, and a partial-rotary factor of 0.25 from the release; this implementation applies RoPE to the full head dimension and trains without the auxiliary loss. Each omission is visible as a config field the code does not read, which is a reasonable map of what a minimal reimplementation keeps and what the production model adds.</p>
+
+      <footer class="article-foot">
+        <a href="/#articles">&larr; All articles</a>
+        <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/qwen3-80B-A3B/model.py" target="_blank" rel="noopener">Full code &rarr;</a>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <div class="colophon">
+        <span>&copy; 2026 Ali Janati</span>
+        <span><a href="/">alijanati.com</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>

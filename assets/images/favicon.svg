@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .bg { fill: #f6f1e6; }
+    .d { fill: #241c11; }
+    .a { fill: #a03d1e; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #191410; }
+      .d { fill: #ece2cf; }
+      .a { fill: #e28f5f; }
+    }
+  </style>
+  <rect class="bg" width="64" height="64" rx="14"/>
+  <circle class="d" cx="17" cy="17" r="5"/>
+  <circle class="d" cx="32" cy="17" r="5"/>
+  <circle class="d" cx="47" cy="17" r="5"/>
+  <circle class="d" cx="17" cy="32" r="5"/>
+  <circle class="a" cx="32" cy="32" r="5"/>
+  <circle class="d" cx="47" cy="32" r="5"/>
+  <circle class="d" cx="17" cy="47" r="5"/>
+  <circle class="d" cx="32" cy="47" r="5"/>
+</svg>

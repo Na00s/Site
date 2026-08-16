@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ali Janati · Research in Deep Learning</title>
+  <meta name="description" content="Ali Janati. Research in deep learning: efficient training and inference for large models, speech-to-speech systems, and interpretability. Papers and open-source work.">
+  <link rel="canonical" href="https://alijanati.com/">
+  <meta name="author" content="Ali Janati">
+  <meta name="theme-color" content="#f6f1e6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#191410" media="(prefers-color-scheme: dark)">
+
+  <meta property="og:type" content="profile">
+  <meta property="og:title" content="Ali Janati · Research in Deep Learning">
+  <meta property="og:description" content="Papers and open-source work: efficient training and inference for large models, speech-to-speech systems, and interpretability.">
+  <meta property="og:url" content="https://alijanati.com/">
+  <meta property="og:image" content="https://alijanati.com/assets/images/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Ali Janati · Research in Deep Learning">
+  <meta name="twitter:description" content="Papers and open-source work: efficient training and inference for large models, speech-to-speech systems, and interpretability.">
+  <meta name="twitter:image" content="https://alijanati.com/assets/images/og.png">
+
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png">
+
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("theme");
+        if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="preload" href="/assets/fonts/fraunces-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/newsreader-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Ali Janati",
+    "url": "https://alijanati.com/",
+    "image": "https://alijanati.com/assets/images/portrait.jpg",
+    "jobTitle": "Senior Machine Learning Scientist",
+    "address": { "@type": "PostalAddress", "addressLocality": "San Francisco", "addressRegion": "CA" },
+    "alumniOf": [
+      { "@type": "CollegeOrUniversity", "name": "Columbia University" },
+      { "@type": "CollegeOrUniversity", "name": "Mines Paris" }
+    ],
+    "sameAs": [
+      "https://github.com/Na00s",
+      "https://huggingface.co/Na0s",
+      "https://www.linkedin.com/in/alijanati/",
+      "https://x.com/gradientszn"
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-head" id="top">
+    <div class="wrap bar">
+      <a class="wordmark" href="/">Ali Janati<span class="dot">.</span></a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="#papers">Papers</a>
+        <a href="#articles">Articles</a>
+        <a href="#open-source">Open source</a>
+        <a href="/assets/docs/CV_Ali.pdf" target="_blank" rel="noopener">CV&nbsp;&darr;</a>
+        <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Light / dark">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 2v14a7 7 0 0 1 0-14z" fill="currentColor"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ================= hero ================= -->
+    <section class="hero wrap">
+      <div class="hero-grid">
+        <div>
+          <h1>Ali Janati<span class="dot">.</span></h1>
+          <p class="role">Research in deep learning.</p>
+          <div class="intro">
+            <p>Efficient training and inference for large models, real-time speech-to-speech systems, and interpretability: measuring which parts of a model are doing the work, and using that to make models smaller and faster.</p>
+            <p>I am a senior machine learning scientist at a startup in San Francisco, where I work on world models and speech. I studied at Columbia and Mines Paris.</p>
+          </div>
+          <ul class="hero-links">
+            <li><a href="mailto:aj3238@columbia.edu">Email</a></li>
+            <li><a href="/assets/docs/CV_Ali.pdf" target="_blank" rel="noopener">CV</a></li>
+            <li><a href="https://github.com/Na00s" target="_blank" rel="noopener">GitHub</a></li>
+            <li><a href="https://huggingface.co/Na0s" target="_blank" rel="noopener">Hugging&nbsp;Face</a></li>
+            <li><a href="https://www.linkedin.com/in/alijanati/" target="_blank" rel="noopener">LinkedIn</a></li>
+            <li><a href="https://x.com/gradientszn" target="_blank" rel="noopener">X</a></li>
+          </ul>
+        </div>
+        <figure class="portrait">
+          <div class="frame">
+            <img src="/assets/images/portrait.jpg" alt="Portrait of Ali Janati." width="400" height="400">
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ================= news ================= -->
+    <section class="news wrap" aria-label="Recent news">
+      <p class="tag">Recent</p>
+      <ul>
+        <li>
+          <span class="when">Aug 2026</span>
+          <span class="what">New <a href="#articles">articles</a>: from-scratch reimplementations of Qwen3-Next-80B-A3B, gpt-oss-20B, Gemma 3 270M, and Llama 3.1 8B, plus speculative decoding across tokenizers.</span>
+        </li>
+        <li>
+          <span class="when">Aug 2026</span>
+          <span class="what">New paper on arXiv: <a href="https://arxiv.org/abs/2608.07890" target="_blank" rel="noopener">router sensitivity under lightweight fine-tuning identifies prunable experts</a> in mixture-of-experts models.</span>
+        </li>
+        <li>
+          <span class="when">Aug 2026</span>
+          <span class="what">New paper on arXiv: <a href="https://arxiv.org/abs/2608.07436" target="_blank" rel="noopener">post-grokking collapse at the representation-readout interface</a> in Muon-trained transformers.</span>
+        </li>
+        <li>
+          <span class="when">Feb 2026</span>
+          <span class="what">New paper on arXiv: <a href="https://arxiv.org/abs/2602.09121" target="_blank" rel="noopener">uncertainty-aware multimodal emotion recognition</a> through Dirichlet parameterization.</span>
+        </li>
+        <li>
+          <span class="when">Jul 2024</span>
+          <span class="what">Released <a href="https://huggingface.co/Na0s/Medical-Whisper-Large-v3" target="_blank" rel="noopener">Medical-Whisper-Large-v3</a> on Hugging Face: 35,000+ downloads.</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ================= papers ================= -->
+    <section class="section" id="papers">
+      <div class="wrap section-grid">
+        <p class="section-label"><span class="no">&sect; 01</span><br>Papers</p>
+        <div>
+          <h2>Papers.</h2>
+          <p class="lede">Most of my work asks which parts of a large model are actually doing the work. Recent papers span expert pruning in mixture-of-experts models, training dynamics after grokking, uncertainty in multimodal recognition, and machine learning for epigenomics.</p>
+
+          <ul class="pubs">
+            <li class="pub">
+              <div class="pub-fig" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <path class="hot" d="M4 46h26M26 41l5 5-5 5"/>
+                  <rect class="ink" x="10" y="10" width="20" height="20" rx="4"/>
+                  <rect class="ink" x="36" y="10" width="20" height="20" rx="4"/>
+                  <rect class="ink-faint" x="62" y="10" width="20" height="20" rx="4"/>
+                  <rect class="ink" x="10" y="36" width="20" height="20" rx="4"/>
+                  <rect class="hot" x="36" y="36" width="20" height="20" rx="4"/>
+                  <rect class="ink" x="62" y="36" width="20" height="20" rx="4"/>
+                  <rect class="ink-faint" x="10" y="62" width="20" height="20" rx="4"/>
+                  <rect class="ink" x="36" y="62" width="20" height="20" rx="4"/>
+                  <rect class="ink" x="62" y="62" width="20" height="20" rx="4"/>
+                </svg>
+              </div>
+              <div>
+                <h3><a href="https://arxiv.org/abs/2608.07890" target="_blank" rel="noopener">Router Sensitivity Under Lightweight Fine-Tuning Identifies Prunable Experts in Mixture-of-Experts Models</a></h3>
+                <p class="authors"><span class="me">Ali Janati</span>, Kaoutar El Maghraoui, X. Luo, W. Shen, O. Zou, Y. Mao</p>
+                <p class="venue">arXiv &middot; Aug 2026</p>
+                <p class="gloss">Routers that barely move under light fine-tuning point to experts that can be pruned with minimal loss in quality.</p>
+                <ul class="chips">
+                  <li><a href="https://arxiv.org/abs/2608.07890" target="_blank" rel="noopener">arXiv</a></li>
+                  <li><a href="https://arxiv.org/pdf/2608.07890" target="_blank" rel="noopener">PDF</a></li>
+                  <li><a href="https://huggingface.co/Na0s" target="_blank" rel="noopener">Models</a></li>
+                </ul>
+              </div>
+            </li>
+
+            <li class="pub">
+              <div class="pub-fig" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <path class="ink" d="M10 14v64h72"/>
+                  <path class="hot" d="M14 70c8 0 12-1 16-3 6-3 8-36 14-41l14-2c4 0 6 6 8 20 2 14 4 22 8 26"/>
+                  <path class="ink-faint" d="M44 24l38-4"/>
+                </svg>
+              </div>
+              <div>
+                <h3><a href="https://arxiv.org/abs/2608.07436" target="_blank" rel="noopener">Post-Grokking Collapse at the Representation-Readout Interface in Muon-Trained Transformers</a></h3>
+                <p class="authors"><span class="me">Ali Janati</span>, Kaoutar El Maghraoui, Andrei Kanavalau, Anass Belfatmi</p>
+                <p class="venue">arXiv &middot; Aug 2026</p>
+                <p class="gloss">Muon reaches grokking faster than AdamW, but generalization later collapses at the interface between representations and readout. Fourier analysis shows the task-solving circuit itself remains accurate.</p>
+                <ul class="chips">
+                  <li><a href="https://arxiv.org/abs/2608.07436" target="_blank" rel="noopener">arXiv</a></li>
+                  <li><a href="https://arxiv.org/pdf/2608.07436" target="_blank" rel="noopener">PDF</a></li>
+                </ul>
+              </div>
+            </li>
+
+            <li class="pub">
+              <div class="pub-fig" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <path class="ink" d="M46 12 14 72h64L46 12z"/>
+                  <path class="hot" d="M50 62c-8-5-4-14 4-13 9 1 12 10 5 14-3 2-6 1-9-1z"/>
+                  <circle class="hot-fill" cx="56" cy="56" r="2.6"/>
+                  <circle class="ink" cx="46" cy="12" r="2.4"/>
+                  <circle class="ink" cx="14" cy="72" r="2.4"/>
+                  <circle class="ink" cx="78" cy="72" r="2.4"/>
+                </svg>
+              </div>
+              <div>
+                <h3><a href="https://arxiv.org/abs/2602.09121" target="_blank" rel="noopener">Uncertainty-Aware Multimodal Emotion Recognition through Dirichlet Parameterization</a></h3>
+                <p class="authors">R. Grzeczkowicz, E. Soriano, <span class="me">Ali Janati</span>, M. Zhang, et&nbsp;al.</p>
+                <p class="venue">arXiv &middot; Feb 2026</p>
+                <p class="gloss">A lightweight, privacy-preserving emotion recognition framework for edge devices, fusing speech, text, and facial signals with Dirichlet-parameterized uncertainty. Validated on five benchmarks.</p>
+                <ul class="chips">
+                  <li><a href="https://arxiv.org/abs/2602.09121" target="_blank" rel="noopener">arXiv</a></li>
+                  <li><a href="https://arxiv.org/pdf/2602.09121" target="_blank" rel="noopener">PDF</a></li>
+                </ul>
+              </div>
+            </li>
+
+            <li class="pub">
+              <div class="pub-fig" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <circle class="ink" cx="20" cy="28" r="8"/>
+                  <circle class="ink" cx="46" cy="28" r="8"/>
+                  <circle class="ink" cx="72" cy="28" r="8"/>
+                  <path class="ink" d="M30 28h6M34 25l3 3-3 3M56 28h6M60 25l3 3-3 3"/>
+                  <path class="ink-faint" d="M12 58h68"/>
+                  <path class="ink" d="M18 54v8M30 54v8M50 54v8M62 54v8M74 54v8"/>
+                  <circle class="hot-fill" cx="40" cy="58" r="2.6"/>
+                  <circle class="hot-fill" cx="68" cy="58" r="2.6"/>
+                  <path class="hot" d="M12 74h68M12 71v6M80 71v6"/>
+                </svg>
+              </div>
+              <div>
+                <h3><a href="https://doi.org/10.1101/2024.05.23.595536" target="_blank" rel="noopener">Improving Allele-Specific Epigenomic Signal Coverage by 10-Fold Using Hidden Markov Modeling and Machine Learning</a></h3>
+                <p class="authors">Emmanuel L.&thinsp;P. Dumont, <span class="me">Ali Janati</span>, Moumita Bhattacharya, Jean-Baptiste Jeannin, Catherine Do</p>
+                <p class="venue">bioRxiv &middot; May 2024</p>
+                <p class="gloss">A variational hidden Markov model that extends allele-specific methylation calling to ten times more of the genome than standard short-read methods.</p>
+                <ul class="chips">
+                  <li><a href="https://doi.org/10.1101/2024.05.23.595536" target="_blank" rel="noopener">bioRxiv</a></li>
+                  <li><a href="https://www.biorxiv.org/content/10.1101/2024.05.23.595536v1.full.pdf" target="_blank" rel="noopener">PDF</a></li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+
+          <p class="aside-note">Earlier research, with Prof.&nbsp;Pierre Gentine&rsquo;s group at Columbia: fine-tuned the IBM-NASA geospatial vision transformer to segment wind-damaged forest in satellite imagery.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= articles ================= -->
+    <section class="section" id="articles">
+      <div class="wrap section-grid">
+        <p class="section-label"><span class="no">&sect; 02</span><br>Articles</p>
+        <div>
+          <h2>Articles.</h2>
+          <p class="lede">Write-ups of the architectures I reimplement from scratch in <a href="https://github.com/Na00s/PyTorch-Playground" target="_blank" rel="noopener">PyTorch-Playground</a>: what is new in each model, how I implemented it, and the code that matters.</p>
+
+          <ul class="articles">
+            <li class="article-row">
+              <span class="when">Aug 2026</span>
+              <div>
+                <h3><a href="/articles/qwen3-next-80b-a3b/">Qwen3-Next-80B-A3B from scratch: DeltaNet, gated attention, and 512 experts</a></h3>
+                <p class="sum">The full hybrid stack in one PyTorch file: linear-attention DeltaNet blocks, gated attention with QK-norm, zero-centered RMSNorm, and a 512-expert MoE with top-10 routing.</p>
+              </div>
+            </li>
+            <li class="article-row">
+              <span class="when">Aug 2026</span>
+              <div>
+                <h3><a href="/articles/gpt-oss-20b/">gpt-oss-20B: the attention pattern and the MoE, reimplemented</a></h3>
+                <p class="sum">Alternating sliding-window and full attention as two masks, RoPE in the rotation-matrix convention, and a 32-expert MoE with gpt-oss's clamped SwiGLU.</p>
+              </div>
+            </li>
+            <li class="article-row">
+              <span class="when">Aug 2026</span>
+              <div>
+                <h3><a href="/articles/gemma-3-270m/">Gemma 3 270M, line by line</a></h3>
+                <p class="sum">Dual RoPE frequencies, QK-norm, sandwich normalization, GeGLU, and fp32 attention accumulation in a model small enough to read whole.</p>
+              </div>
+            </li>
+            <li class="article-row">
+              <span class="when">Aug 2026</span>
+              <div>
+                <h3><a href="/articles/llama-3-1-8b-kv-cache/">Llama 3.1 8B with a hand-written KV cache</a></h3>
+                <p class="sum">Grouped-query attention by broadcasting instead of repeat_kv, RoPE with a position offset, and the twenty lines of caching behind fast decoding.</p>
+              </div>
+            </li>
+            <li class="article-row">
+              <span class="when">Aug 2026</span>
+              <div>
+                <h3><a href="/articles/speculative-decoding/">Speculative decoding from scratch, including across tokenizers</a></h3>
+                <p class="sum">The accept-reject rule and batched prefix acceptance, then Universal Assisted Generation between models that do not share a tokenizer.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= open source ================= -->
+    <section class="section" id="open-source">
+      <div class="wrap section-grid">
+        <p class="section-label"><span class="no">&sect; 03</span><br>Open source</p>
+        <div>
+          <h2>Open source.</h2>
+
+          <ul class="projects">
+            <li class="project">
+              <div class="head">
+                <h3>PyTorch-Playground</h3>
+                <ul class="chips"><li><a href="https://github.com/Na00s/PyTorch-Playground" target="_blank" rel="noopener">GitHub</a></li></ul>
+              </div>
+              <p class="desc">From-scratch PyTorch reimplementations of modern architectures: Llama&nbsp;3.1&nbsp;8B, GPT-2, gpt-oss-20B, Qwen3-80B-A3B, Gemma&nbsp;270M, and Magistral&nbsp;Small, plus speculative decoding and quantization-aware training.</p>
+            </li>
+            <li class="project">
+              <div class="head">
+                <h3>Medical-Whisper-Large-v3</h3>
+                <ul class="chips"><li><a href="https://huggingface.co/Na0s/Medical-Whisper-Large-v3" target="_blank" rel="noopener">Hugging&nbsp;Face</a></li></ul>
+              </div>
+              <p class="desc">Whisper large-v3 fine-tuned for medical conversation: 14% lower word-error rate on validation, released as open weights. 35,000+ downloads on Hugging Face.</p>
+            </li>
+            <li class="project">
+              <div class="head">
+                <h3>MoE pruning models</h3>
+                <ul class="chips"><li><a href="https://huggingface.co/Na0s" target="_blank" rel="noopener">Hugging&nbsp;Face</a></li></ul>
+              </div>
+              <p class="desc">Open artifacts behind the router-sensitivity paper: Mixtral-8x7B and Qwen1.5-MoE variants with experts pruned and ablated, along with the SFT datasets used to recover performance.</p>
+            </li>
+            <li class="project">
+              <div class="head">
+                <h3>GAN_Monet_Style</h3>
+                <ul class="chips"><li><a href="https://github.com/Na00s/GAN_Monet_Style" target="_blank" rel="noopener">GitHub</a></li></ul>
+              </div>
+              <p class="desc">A CycleGAN that transfers Claude Monet&rsquo;s painting style to photographs.</p>
+            </li>
+          </ul>
+
+          <p class="more-link"><a href="https://github.com/Na00s?tab=repositories" target="_blank" rel="noopener">More on GitHub &rarr;</a></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= footer ================= -->
+  <footer class="site-foot" id="contact">
+    <div class="wrap foot-grid">
+      <div>
+        <h2>Contact.</h2>
+        <p class="reach">Email: <a href="mailto:aj3238@columbia.edu">aj3238@columbia.edu</a></p>
+        <ul class="foot-links">
+          <li><a href="mailto:aj3238@columbia.edu">Email</a></li>
+          <li><a href="/assets/docs/CV_Ali.pdf" target="_blank" rel="noopener">CV</a></li>
+          <li><a href="https://github.com/Na00s" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="https://huggingface.co/Na0s" target="_blank" rel="noopener">Hugging&nbsp;Face</a></li>
+          <li><a href="https://www.linkedin.com/in/alijanati/" target="_blank" rel="noopener">LinkedIn</a></li>
+          <li><a href="https://x.com/gradientszn" target="_blank" rel="noopener">X</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="colophon">
+        <span>Static HTML and CSS, no frameworks. Set in Fraunces, Newsreader, and IBM&nbsp;Plex&nbsp;Mono.</span>
+        <span>&copy; 2026 Ali Janati</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>
