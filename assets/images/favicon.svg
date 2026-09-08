@@ -1,21 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <style>
-    .bg { fill: #f6f1e6; }
-    .d { fill: #241c11; }
-    .a { fill: #a03d1e; }
-    @media (prefers-color-scheme: dark) {
-      .bg { fill: #191410; }
-      .d { fill: #ece2cf; }
-      .a { fill: #e28f5f; }
-    }
-  </style>
-  <rect class="bg" width="64" height="64" rx="14"/>
-  <circle class="d" cx="17" cy="17" r="5"/>
-  <circle class="d" cx="32" cy="17" r="5"/>
-  <circle class="d" cx="47" cy="17" r="5"/>
-  <circle class="d" cx="17" cy="32" r="5"/>
-  <circle class="a" cx="32" cy="32" r="5"/>
-  <circle class="d" cx="47" cy="32" r="5"/>
-  <circle class="d" cx="17" cy="47" r="5"/>
-  <circle class="d" cx="32" cy="47" r="5"/>
+  <defs>
+    <clipPath id="frame"><rect width="64" height="64" rx="14"/></clipPath>
+  </defs>
+  <g clip-path="url(#frame)">
+    <path fill="#a5c6e7" d="M0 0h64v64H0z"/>
+    <path fill="#f3c49f" d="M0 39h64v25H0z"/>
+    <circle fill="#f0ab7d" cx="47" cy="17" r="8"/>
+    <path fill="#6288b3" d="M-6 57 29 25h6l35 32z"/>
+    <path fill="#faf4e9" d="m29 25-9 8 7-1 5 4 4-4 8 1-9-8z"/>
+    <path fill="#88acd3" d="M0 53q16-4 32 0t32 0v11H0z"/>
+  </g>
 </svg>
