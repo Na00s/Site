@@ -26,17 +26,19 @@
   <script>
     (function () {
       try {
-        var t = localStorage.getItem("theme");
-        if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        var t = localStorage.getItem("reference-theme");
+        if (!t) t = "light";
         document.documentElement.setAttribute("data-theme", t);
       } catch (e) {}
     })();
   </script>
 
-  <link rel="preload" href="/assets/fonts/fraunces-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/assets/fonts/newsreader-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/assets/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="preload" href="./assets/serif.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./assets/sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./assets/mono.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./site.css?v=blue-section-headings-1">
+  <link rel="stylesheet" href="./content.css?v=light-blue-titles-1">
+  <link rel="stylesheet" href="./figures.css?v=blue-peach-icons-1">
 
   <script type="application/ld+json">
   {
@@ -59,47 +61,74 @@
     ]
   }
   </script>
+  <link rel="stylesheet" href="/navigation.css?v=landscape-4">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-head" id="top">
     <div class="wrap bar">
-      <a class="wordmark" href="/">Ali Janati<span class="dot">.</span></a>
-      <nav class="site-nav" aria-label="Site">
+      <a class="wordmark" href="./">Ali Janati<span class="dot">.</span></a>
+      <nav class="site-nav" id="site-nav" aria-label="Site">
         <a href="#papers">Papers</a>
         <a href="#articles">Articles</a>
         <a href="#open-source">Open source</a>
-        <a href="/assets/docs/CV_Ali.pdf" target="_blank" rel="noopener">CV&nbsp;&darr;</a>
+        <a href="/cv/" target="_blank" rel="noopener">CV&nbsp;&darr;</a>
         <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Light / dark">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 2v14a7 7 0 0 1 0-14z" fill="currentColor"/></svg>
         </button>
       </nav>
+      <button class="menu-toggle" type="button" aria-label="Navigation menu" aria-expanded="false" aria-controls="site-nav" data-preview-ui><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h7"/></svg></button>
     </div>
   </header>
+
+  <nav class="side-toc" aria-label="Contents" data-preview-ui inert>
+      <a href="#recent" aria-label="Recent"><span>Recent</span></a>
+      <a href="#papers" aria-label="Papers"><span>Papers</span></a>
+      <a href="#articles" aria-label="Articles"><span>Articles</span></a>
+      <a href="#open-source" aria-label="Open source"><span>Open source</span></a>
+      <a href="#contact" aria-label="Contact"><span>Contact</span></a>
+  </nav>
 
   <main id="main">
 
     <!-- ================= hero ================= -->
-    <section class="hero wrap">
-      <div class="hero-grid">
-        <div>
-          <h1>Ali Janati<span class="dot">.</span></h1>
-          <p class="role">Research in deep learning.</p>
-          <div class="intro">
-            <p>I study how neural networks learn, organize knowledge, and generalize. My research spans model architecture, optimization, training dynamics, and interpretability. I am especially interested in how a model’s internal structure gives rise to its capabilities, how those capabilities evolve during training, and how understanding these relationships can lead to better architectures and training methods.</p>
+    <section class="cover" aria-labelledby="cover-title" data-sky-mode="day">
+      <div id="sky-scene" aria-hidden="true"></div>
+      <div class="cover-words">
+        <h1 id="cover-title" data-sky-shelter="title">Ali Janati<span class="dot">.</span></h1>
+        <p class="role" data-sky-shelter="date">Research in deep learning.</p>
+        <nav class="cover-index" aria-label="Contents" data-sky-shelter="index" data-preview-ui>
+          <a class="cover-index-row" href="#recent"><span class="index-number">[1]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Recent</span></a>
+          <a class="cover-index-row" href="#papers"><span class="index-number">[2]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Papers</span></a>
+          <a class="cover-index-row" href="#articles"><span class="index-number">[3]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Articles</span></a>
+          <a class="cover-index-row" href="#open-source"><span class="index-number">[4]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Open source</span></a>
+          <a class="cover-index-row" href="#contact"><span class="index-number">[5]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Contact</span></a>
+        </nav>
+      </div>
+      <a class="background-picker" href="/backgrounds/" data-preview-ui>Backgrounds</a>
+      <div class="sky-modes" role="group" aria-label="Sky appearance" data-preview-ui>
+        <button type="button" data-sky-mode="day" aria-label="Day" aria-pressed="true"></button>
+        <button type="button" data-sky-mode="night" aria-label="Night" aria-pressed="false"></button>
+        <button type="button" data-sky-mode="dawn" aria-label="Dawn" aria-pressed="false"></button>
+      </div>
+    </section>
+    <section class="reading-intro wrap" id="introduction">
+      <div class="intro">
+            <p>I study how neural networks learn, organize knowledge, and generalize.</p>
+            <p>My research spans model architecture, optimization, training dynamics, and interpretability. I am especially interested in how a model’s internal structure gives rise to its capabilities, how those capabilities evolve during training, and how understanding these relationships can lead to better architectures and training methods.</p>
             <p>I am a senior machine learning scientist at a startup in San Francisco, where I work on world models. I am an alumnus of Columbia and Mines Paris.</p>
             <p>On this website, I share my papers, implementations, experimental studies, and articles, along with thoughts and ideas across my research and broader interests.</p>
           </div>
-          <ul class="hero-links">
+      <div class="author-links">
+        <ul class="hero-links">
             <li><a href="mailto:aj3238@columbia.edu">Email</a></li>
-            <li><a href="/assets/docs/CV_Ali.pdf" target="_blank" rel="noopener">CV</a></li>
+            <li><a href="/cv/" target="_blank" rel="noopener">CV</a></li>
             <li><a href="https://github.com/Na00s" target="_blank" rel="noopener">GitHub</a></li>
             <li><a href="https://huggingface.co/Na0s" target="_blank" rel="noopener">Hugging&nbsp;Face</a></li>
             <li><a href="https://www.linkedin.com/in/alijanati/" target="_blank" rel="noopener">LinkedIn</a></li>
             <li><a href="https://x.com/gradientszn" target="_blank" rel="noopener">X</a></li>
           </ul>
-        </div>
         <figure class="portrait">
           <div class="frame">
             <img src="/assets/images/portrait.jpg" alt="Portrait of Ali Janati." width="400" height="400">
@@ -109,7 +138,7 @@
     </section>
 
     <!-- ================= news ================= -->
-    <section class="news wrap" aria-label="Recent news">
+    <section class="news wrap" id="recent" aria-label="Recent news">
       <p class="tag">Recent</p>
       <ul>
         <li>
@@ -135,8 +164,8 @@
       </ul>
     </section>
 
-    <!-- ================= papers ================= -->
-    <section class="section" id="papers">
+<!-- ================= papers ================= -->
+    <section class="section content-section" id="papers">
       <div class="wrap section-grid">
         <p class="section-label"><span class="no">&sect; 01</span><br>Papers</p>
         <div>
@@ -249,7 +278,7 @@
     </section>
 
     <!-- ================= articles ================= -->
-    <section class="section" id="articles">
+    <section class="section content-section" id="articles">
       <div class="wrap section-grid">
         <p class="section-label"><span class="no">&sect; 02</span><br>Articles</p>
         <div>
@@ -258,36 +287,91 @@
 
           <ul class="articles">
             <li class="article-row">
-              <span class="when">Aug 2026</span>
-              <div>
+              <div class="pub-fig content-fig" data-figure="hybrid-attention" data-figure-label="Hybrid attention scales" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <path class="ink" d="M10 12v68h73"/>
+                  <path class="ink-faint" d="M14 65c12 0 15-42 31-42s18 42 35 42"/>
+                  <path class="hot" d="M14 62c5 0 5-26 11-26s5 26 11 26 5-26 11-26 5 26 11 26 5-26 11-26 5 26 11 26"/>
+                  <path class="ink-faint" d="M30 77v6M50 77v6M70 77v6"/>
+                </svg>
+              </div>
+              <div class="article-copy">
+                <span class="when">Aug 2026</span>
                 <h3><a href="/articles/qwen3-next-80b-a3b/">Qwen3-Next-80B-A3B from scratch: DeltaNet, gated attention, and 512 experts</a></h3>
                 <p class="sum">The full hybrid stack in one PyTorch file: linear-attention DeltaNet blocks, gated attention with QK-norm, zero-centered RMSNorm, and a 512-expert MoE with top-10 routing.</p>
               </div>
             </li>
             <li class="article-row">
-              <span class="when">Aug 2026</span>
-              <div>
+              <div class="pub-fig content-fig" data-figure="sparse-routing" data-figure-label="Sparse expert routing" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <path class="ink-faint" d="M20 46 44 15M20 46 44 77M59 15 80 46M59 77 80 46"/>
+                  <path class="hot" d="M20 46 44 36M59 36 80 46M20 46 44 57M59 57 80 46"/>
+                  <circle class="ink" cx="14" cy="46" r="6"/>
+                  <rect class="ink-faint" x="44" y="9" width="15" height="12" rx="2"/>
+                  <rect class="ink" x="44" y="30" width="15" height="12" rx="2"/>
+                  <rect class="ink" x="44" y="51" width="15" height="12" rx="2"/>
+                  <rect class="ink-faint" x="44" y="71" width="15" height="12" rx="2"/>
+                  <circle class="ink" cx="81" cy="46" r="5"/>
+                </svg>
+              </div>
+              <div class="article-copy">
+                <span class="when">Aug 2026</span>
                 <h3><a href="/articles/gpt-oss-20b/">gpt-oss-20B: the attention pattern and the MoE, reimplemented</a></h3>
                 <p class="sum">Alternating sliding-window and full attention as two masks, RoPE in the rotation-matrix convention, and a 32-expert MoE with gpt-oss's clamped SwiGLU.</p>
               </div>
             </li>
             <li class="article-row">
-              <span class="when">Aug 2026</span>
-              <div>
+              <div class="pub-fig content-fig" data-figure="compact-model" data-figure-label="Compact model learning curves" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <path class="ink" d="M11 12v67h72"/>
+                  <path class="ink-faint" d="M15 72c12-1 14-24 25-34s23-13 39-13"/>
+                  <path class="hot" d="M15 71c13-1 12-32 26-45s22-12 38-12"/>
+                  <path class="ink-faint" d="M15 73c18-1 25-14 36-17s19-4 28-4"/>
+                  <path class="ink-faint" d="M9 29h4M9 51h4M32 77v4M57 77v4"/>
+                </svg>
+              </div>
+              <div class="article-copy">
+                <span class="when">Aug 2026</span>
                 <h3><a href="/articles/gemma-3-270m/">Gemma 3 270M, line by line</a></h3>
                 <p class="sum">Dual RoPE frequencies, QK-norm, sandwich normalization, GeGLU, and fp32 attention accumulation in a model small enough to read whole.</p>
               </div>
             </li>
             <li class="article-row">
-              <span class="when">Aug 2026</span>
-              <div>
+              <div class="pub-fig content-fig" data-figure="kv-reuse" data-figure-label="Key and value cache reuse" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <path class="hot" d="M11 27h14M66 27h14v41H51"/>
+                  <path class="ink-faint" d="M11 43h14M66 43h10"/>
+                  <rect class="ink" x="25" y="18" width="41" height="35" rx="3"/>
+                  <path class="ink-faint" d="M39 18v35M52 18v35M25 35h41"/>
+                  <rect class="ink" x="30" y="60" width="21" height="16" rx="3"/>
+                  <path class="hot" d="M30 68H16V52M47 64l-4 4 4 4"/>
+                  <path class="ink-faint" d="M32 25h3M45 25h3M58 25h3M32 43h3M45 43h3M58 43h3"/>
+                </svg>
+              </div>
+              <div class="article-copy">
+                <span class="when">Aug 2026</span>
                 <h3><a href="/articles/llama-3-1-8b-kv-cache/">Llama 3.1 8B with a hand-written KV cache</a></h3>
                 <p class="sum">Grouped-query attention by broadcasting instead of repeat_kv, RoPE with a position offset, and the twenty lines of caching behind fast decoding.</p>
               </div>
             </li>
             <li class="article-row">
-              <span class="when">Aug 2026</span>
-              <div>
+              <div class="pub-fig content-fig" data-figure="speculative-paths" data-figure-label="Speculative token acceptance paths" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <path class="ink-faint" d="M13 46 34 68 57 79M34 26 57 11M57 36 80 54M57 79 80 70"/>
+                  <path class="hot" d="M13 46 34 26 57 36 80 17"/>
+                  <circle class="ink" cx="13" cy="46" r="3"/>
+                  <circle class="ink" cx="34" cy="26" r="3"/>
+                  <circle class="ink" cx="57" cy="36" r="3"/>
+                  <circle class="ink" cx="80" cy="17" r="3"/>
+                  <circle class="ink-faint" cx="34" cy="68" r="3"/>
+                  <circle class="ink-faint" cx="57" cy="11" r="3"/>
+                  <circle class="ink-faint" cx="57" cy="79" r="3"/>
+                  <circle class="ink-faint" cx="80" cy="54" r="3"/>
+                  <circle class="ink-faint" cx="80" cy="70" r="3"/>
+                </svg>
+              </div>
+              <div class="article-copy">
+                <span class="when">Aug 2026</span>
                 <h3><a href="/articles/speculative-decoding/">Speculative decoding from scratch, including across tokenizers</a></h3>
                 <p class="sum">The accept-reject rule and batched prefix acceptance, then Universal Assisted Generation between models that do not share a tokenizer.</p>
               </div>
@@ -298,7 +382,7 @@
     </section>
 
     <!-- ================= open source ================= -->
-    <section class="section" id="open-source">
+    <section class="section content-section" id="open-source">
       <div class="wrap section-grid">
         <p class="section-label"><span class="no">&sect; 03</span><br>Open source</p>
         <div>
@@ -306,42 +390,104 @@
 
           <ul class="projects">
             <li class="project">
-              <div class="head">
-                <h3>PyTorch-Playground</h3>
-                <ul class="chips"><li><a href="https://github.com/Na00s/PyTorch-Playground" target="_blank" rel="noopener">GitHub</a></li></ul>
+              <div class="pub-fig content-fig" data-figure="architecture-blocks" data-figure-label="Modular architecture and residual connections" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <path class="hot" d="M9 46h13M39 46h14M70 46h13"/>
+                  <rect class="ink" x="22" y="33" width="17" height="26" rx="3"/>
+                  <rect class="ink" x="53" y="33" width="17" height="26" rx="3"/>
+                  <path class="ink-faint" d="M15 46V17h61v29M27 41h7M27 47h7M27 53h7M58 41h7M58 47h7M58 53h7"/>
+                  <path class="hot" d="M30 59v16h31V59"/>
+                  <path class="ink-faint" d="M72 42l4 4 4-4"/>
+                </svg>
               </div>
-              <p class="desc">From-scratch PyTorch reimplementations of modern architectures: Llama&nbsp;3.1&nbsp;8B, GPT-2, gpt-oss-20B, Qwen3-80B-A3B, Gemma&nbsp;270M, and Magistral&nbsp;Small, plus speculative decoding and quantization-aware training.</p>
+              <div class="project-copy">
+                <div class="head">
+                  <h3><a href="https://github.com/Na00s/PyTorch-Playground" target="_blank" rel="noopener">PyTorch-Playground</a></h3>
+                  <ul class="chips"><li><a href="https://github.com/Na00s/PyTorch-Playground" target="_blank" rel="noopener">GitHub</a></li></ul>
+                </div>
+                <p class="desc">From-scratch PyTorch reimplementations of modern architectures: Llama&nbsp;3.1&nbsp;8B, GPT-2, gpt-oss-20B, Qwen3-80B-A3B, Gemma&nbsp;270M, and Magistral&nbsp;Small, plus speculative decoding and quantization-aware training.</p>
+              </div>
             </li>
             <li class="project">
-              <div class="head">
-                <h3>Medical-Whisper-Large-v3</h3>
-                <ul class="chips"><li><a href="https://huggingface.co/Na0s/Medical-Whisper-Large-v3" target="_blank" rel="noopener">Hugging&nbsp;Face</a></li></ul>
+              <div class="pub-fig content-fig" data-figure="transcription-wave" data-figure-label="Audio waveform and aligned transcript" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <path class="ink-faint" d="M9 37h74"/>
+                  <path class="hot" d="M9 37h6l3-8 4 20 5-36 5 49 5-41 5 30 5-24 5 17 4-11 4 8 4-5h17"/>
+                  <path class="ink-faint" d="M11 73h70M21 64v4M43 64v4M65 64v4"/>
+                  <rect class="ink" x="12" y="70" width="18" height="9" rx="2"/>
+                  <rect class="ink" x="34" y="70" width="18" height="9" rx="2"/>
+                  <rect class="ink" x="56" y="70" width="23" height="9" rx="2"/>
+                </svg>
               </div>
-              <p class="desc">Whisper large-v3 fine-tuned for medical conversation: 14% lower word-error rate on validation, released as open weights. 35,000+ downloads on Hugging Face.</p>
+              <div class="project-copy">
+                <div class="head">
+                  <h3><a href="https://huggingface.co/Na0s/Medical-Whisper-Large-v3" target="_blank" rel="noopener">Medical-Whisper-Large-v3</a></h3>
+                  <ul class="chips"><li><a href="https://huggingface.co/Na0s/Medical-Whisper-Large-v3" target="_blank" rel="noopener">Hugging&nbsp;Face</a></li></ul>
+                </div>
+                <p class="desc">Whisper large-v3 fine-tuned for medical conversation: 14% lower word-error rate on validation, released as open weights. 35,000+ downloads on Hugging Face.</p>
+              </div>
             </li>
             <li class="project">
-              <div class="head">
-                <h3>MoE pruning models</h3>
-                <ul class="chips">
-                  <li><a href="https://huggingface.co/collections/Na0s/pruned-moes-mixtral-8x7b-instruct-v01-67019397bc00379a3b7657da" target="_blank" rel="noopener">Collection</a></li>
-                  <li><a href="https://huggingface.co/Na0s" target="_blank" rel="noopener">All&nbsp;models</a></li>
-                </ul>
+              <div class="pub-fig content-fig" data-figure="pruned-experts" data-figure-label="Selected experts retained after pruning" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <rect class="ink" x="10" y="10" width="19" height="15" rx="3"/>
+                  <rect class="ink-faint" x="10" y="29" width="19" height="15" rx="3"/>
+                  <rect class="ink" x="10" y="48" width="19" height="15" rx="3"/>
+                  <rect class="ink-faint" x="10" y="67" width="19" height="15" rx="3"/>
+                  <path class="ink-faint" d="M13 32l13 9M13 70l13 9"/>
+                  <path class="hot" d="M29 17c16 0 14 18 31 18M29 56c16 0 15 1 31 1"/>
+                  <rect class="ink" x="60" y="27" width="22" height="16" rx="3"/>
+                  <rect class="ink" x="60" y="49" width="22" height="16" rx="3"/>
+                  <path class="ink-faint" d="M44 13v10M39 18h10"/>
+                </svg>
               </div>
-              <p class="desc">Open artifacts behind the router-sensitivity paper: Mixtral-8x7B and Qwen1.5-MoE variants with experts pruned and ablated, along with the SFT datasets used to recover performance. The Mixtral series is curated as a collection; the full set lives on the profile.</p>
+              <div class="project-copy">
+                <div class="head">
+                  <h3><a href="https://huggingface.co/collections/Na0s/pruned-moes-mixtral-8x7b-instruct-v01-67019397bc00379a3b7657da" target="_blank" rel="noopener">MoE pruning models</a></h3>
+                  <ul class="chips">
+                    <li><a href="https://huggingface.co/collections/Na0s/pruned-moes-mixtral-8x7b-instruct-v01-67019397bc00379a3b7657da" target="_blank" rel="noopener">Collection</a></li>
+                    <li><a href="https://huggingface.co/Na0s" target="_blank" rel="noopener">All&nbsp;models</a></li>
+                  </ul>
+                </div>
+                <p class="desc">Open artifacts behind the router-sensitivity paper: Mixtral-8x7B and Qwen1.5-MoE variants with experts pruned and ablated, along with the SFT datasets used to recover performance. The Mixtral series is curated as a collection; the full set lives on the profile.</p>
+              </div>
             </li>
             <li class="project">
-              <div class="head">
-                <h3>muon-grokking</h3>
-                <ul class="chips"><li><a href="https://github.com/Na00s/muon-grokking" target="_blank" rel="noopener">GitHub</a></li></ul>
+              <div class="pub-fig content-fig" data-figure="grokking-sweeps" data-figure-label="Training and generalization dynamics" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <path class="ink" d="M11 12v68h71"/>
+                  <path class="ink-faint" d="M15 73c8 0 10-47 22-53s26-2 43-2"/>
+                  <path class="hot" d="M15 74h13c13 0 13-49 26-49s11 21 14 31 6 17 12 18"/>
+                  <path class="ink-faint" d="M15 75h24c13 0 12-42 24-47s10-4 17-4"/>
+                  <path class="ink-faint" d="M37 77v6M60 77v6"/>
+                </svg>
               </div>
-              <p class="desc">The experiment suite behind the post-grokking-collapse paper: Muon and AdamW sweeps on modular arithmetic, freezing and unembedding-rate interventions at the representation-readout interface, and a generality suite across moduli, widths, and training configurations.</p>
+              <div class="project-copy">
+                <div class="head">
+                  <h3><a href="https://github.com/Na00s/muon-grokking" target="_blank" rel="noopener">muon-grokking</a></h3>
+                  <ul class="chips"><li><a href="https://github.com/Na00s/muon-grokking" target="_blank" rel="noopener">GitHub</a></li></ul>
+                </div>
+                <p class="desc">The experiment suite behind the post-grokking-collapse paper: Muon and AdamW sweeps on modular arithmetic, freezing and unembedding-rate interventions at the representation-readout interface, and a generality suite across moduli, widths, and training configurations.</p>
+              </div>
             </li>
             <li class="project">
-              <div class="head">
-                <h3>GAN_Monet_Style</h3>
-                <ul class="chips"><li><a href="https://github.com/Na00s/GAN_Monet_Style" target="_blank" rel="noopener">GitHub</a></li></ul>
+              <div class="pub-fig content-fig" data-figure="cycle-transfer" data-figure-label="Cycle-consistent image style transfer" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <rect class="ink" x="8" y="32" width="27" height="29" rx="3"/>
+                  <rect class="ink" x="57" y="32" width="27" height="29" rx="3"/>
+                  <path class="ink-faint" d="m12 55 8-13 5 7 6-5M61 51c4-11 7 10 11-1s5 7 8-3"/>
+                  <circle class="ink-faint" cx="28" cy="39" r="2"/>
+                  <path class="hot" d="M23 29c2-19 44-19 47 0M69 26l1 4 4-2"/>
+                  <path class="hot" d="M70 65c-2 17-44 17-47 0M19 68l4-4 3 4"/>
+                </svg>
               </div>
-              <p class="desc">A CycleGAN that transfers Claude Monet&rsquo;s painting style to photographs.</p>
+              <div class="project-copy">
+                <div class="head">
+                  <h3><a href="https://github.com/Na00s/GAN_Monet_Style" target="_blank" rel="noopener">GAN_Monet_Style</a></h3>
+                  <ul class="chips"><li><a href="https://github.com/Na00s/GAN_Monet_Style" target="_blank" rel="noopener">GitHub</a></li></ul>
+                </div>
+                <p class="desc">A CycleGAN that transfers Claude Monet&rsquo;s painting style to photographs.</p>
+              </div>
             </li>
           </ul>
 
@@ -359,7 +505,7 @@
         <p class="reach">Email: <a href="mailto:aj3238@columbia.edu">aj3238@columbia.edu</a></p>
         <ul class="foot-links">
           <li><a href="mailto:aj3238@columbia.edu">Email</a></li>
-          <li><a href="/assets/docs/CV_Ali.pdf" target="_blank" rel="noopener">CV</a></li>
+          <li><a href="/cv/" target="_blank" rel="noopener">CV</a></li>
           <li><a href="https://github.com/Na00s" target="_blank" rel="noopener">GitHub</a></li>
           <li><a href="https://huggingface.co/Na0s" target="_blank" rel="noopener">Hugging&nbsp;Face</a></li>
           <li><a href="https://www.linkedin.com/in/alijanati/" target="_blank" rel="noopener">LinkedIn</a></li>
@@ -375,6 +521,10 @@
     </div>
   </footer>
 
-  <script src="/assets/js/main.js" defer></script>
+  <script src="./figures.js?v=all-sections-1" defer></script>
+  <script src="./site.js?v=landscape-4" defer></script>
+  <script type="module" src="./sky.js?v=landscape-4"></script>
+  <script src="/navigation.js?v=landscape-4" defer></script>
+  <script type="module" src="/backgrounds.js?v=original-feel-4"></script>
 </body>
 </html>

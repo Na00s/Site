@@ -1,0 +1,242 @@
+{
+  "reference": "../../reference/anthropic/desktop-hero.png",
+  "patches": {
+    "sky_top": {
+      "rgb": [
+        132,
+        159,
+        207
+      ],
+      "hex": "#849fcf",
+      "patch": [
+        400,
+        90,
+        700,
+        150
+      ]
+    },
+    "sky_center": {
+      "rgb": [
+        114,
+        154,
+        208
+      ],
+      "hex": "#729ad0",
+      "patch": [
+        380,
+        250,
+        950,
+        360
+      ]
+    },
+    "sky_low": {
+      "rgb": [
+        116,
+        155,
+        208
+      ],
+      "hex": "#749bd0",
+      "patch": [
+        360,
+        800,
+        970,
+        940
+      ]
+    },
+    "cloud_peach": {
+      "rgb": [
+        207,
+        189,
+        194
+      ],
+      "hex": "#cfbdc2",
+      "patch": [
+        40,
+        240,
+        110,
+        300
+      ]
+    },
+    "cloud_rose": {
+      "rgb": [
+        213,
+        192,
+        192
+      ],
+      "hex": "#d5c0c0",
+      "patch": [
+        35,
+        335,
+        100,
+        400
+      ]
+    },
+    "cloud_cream": {
+      "rgb": [
+        236,
+        215,
+        152
+      ],
+      "hex": "#ecd798",
+      "patch": [
+        35,
+        485,
+        95,
+        530
+      ]
+    },
+    "cloud_warm": {
+      "rgb": [
+        204,
+        183,
+        169
+      ],
+      "hex": "#ccb7a9",
+      "patch": [
+        35,
+        570,
+        90,
+        630
+      ]
+    },
+    "sky_shadow": {
+      "rgb": [
+        124,
+        157,
+        208
+      ],
+      "hex": "#7c9dd0",
+      "patch": [
+        1160,
+        890,
+        1210,
+        950
+      ]
+    }
+  },
+  "color_families": {
+    "blue": [
+      {
+        "rgb": [
+          110,
+          150,
+          205
+        ],
+        "hex": "#6e96cd"
+      },
+      {
+        "rgb": [
+          115,
+          154,
+          208
+        ],
+        "hex": "#739ad0"
+      },
+      {
+        "rgb": [
+          123,
+          158,
+          209
+        ],
+        "hex": "#7b9ed1"
+      }
+    ],
+    "peach": [
+      {
+        "rgb": [
+          206,
+          183,
+          167
+        ],
+        "hex": "#ceb7a7"
+      },
+      {
+        "rgb": [
+          218,
+          196,
+          176
+        ],
+        "hex": "#dac4b0"
+      },
+      {
+        "rgb": [
+          224,
+          204,
+          182
+        ],
+        "hex": "#e0ccb6"
+      }
+    ],
+    "cream": [
+      {
+        "rgb": [
+          221,
+          201,
+          167
+        ],
+        "hex": "#ddc9a7"
+      },
+      {
+        "rgb": [
+          227,
+          207,
+          174
+        ],
+        "hex": "#e3cfae"
+      },
+      {
+        "rgb": [
+          232,
+          213,
+          175
+        ],
+        "hex": "#e8d5af"
+      }
+    ]
+  },
+  "active_stops": {
+    "blueShade": {
+      "rgb": [
+        74,
+        104,
+        146
+      ]
+    },
+    "blue": {
+      "rgb": [
+        115,
+        154,
+        208
+      ]
+    },
+    "blueLight": {
+      "rgb": [
+        173,
+        195,
+        224
+      ]
+    },
+    "peachShade": {
+      "rgb": [
+        205,
+        146,
+        120
+      ]
+    },
+    "peach": {
+      "rgb": [
+        238,
+        188,
+        154
+      ]
+    },
+    "cream": {
+      "rgb": [
+        246,
+        223,
+        193
+      ]
+    }
+  },
+  "notes": "Reference central blue, continuous photographic lightness, scene-specific warm lighting, and a small pale pink atmospheric tint. No cross-family hue rotation."
+}

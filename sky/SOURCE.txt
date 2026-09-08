@@ -1,0 +1,13 @@
+Original public scene source
+https://www.anthropic.com/claude-fable-and-mythos-5-1
+
+Renderer bundle: /_next/static/chunks/14c8frmb4u5hu.js
+THREE and GLTFLoader bundle: /_next/static/chunks/43wzyymewd7k8.js
+Assets: /fx/hero/bark_diff.webp, bark_nor.webp, tit_diff.webp, tit_norm.webp, tit_rgh.webp, tit.glb
+
+original-scene.js preserves both downloaded factories with their Turbopack
+transport replaced by an isolated module export map. The standalone sky.js
+adapter supplies the existing page's container and controls. The original
+scene's rendering logic is retained.
+
+Font source: original page CSS @font-face files, saved locally in ../assets/.

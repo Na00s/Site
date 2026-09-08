@@ -1,0 +1,91 @@
+/* All content entries share the paper figure's icon-left reading layout. */
+.content-section .article-row,
+.content-section .project {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+.content-section .article-copy,
+.content-section .project-copy { min-width: 0; }
+.content-section .article-copy .when {
+  display: block;
+  margin: 0 0 9px;
+  padding: 0;
+}
+@media (max-width: 600px) {
+  .content-section .article-row,
+  .content-section .project { display: block; }
+}
+
+/* Soft blue structure with warm peach movement across every content figure. */
+.pub-fig {
+  --figure-line: #7396bd;
+  --figure-secondary: #a3b3c5;
+  --figure-accent: #d98e68;
+}
+[data-theme="dark"] .pub-fig {
+  --figure-line: #95b9dd;
+  --figure-secondary: #7189a3;
+  --figure-accent: #edb08f;
+}
+.pub-fig .ink,
+.pub-fig .hot { stroke: var(--figure-line); }
+.pub-fig .ink-faint { stroke: var(--figure-secondary); }
+.pub-fig .hot-fill { fill: var(--figure-accent); }
+
+/* Motion constants follow the reference site's chart draw/reveal system. */
+.pub-fig.figures-interactive {
+  --figure-draw: 700ms;
+  --figure-fade: 300ms;
+  --figure-ease: cubic-bezier(.165,.84,.44,1);
+  opacity: 1;
+  cursor: crosshair;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 0;
+  outline: 1px solid transparent;
+  outline-offset: 7px;
+  transition: outline-color .15s var(--figure-ease);
+}
+.pub-fig.figures-interactive:focus-visible {
+  outline-color: var(--figure-line);
+}
+.pub-fig.figures-interactive svg { overflow: visible; }
+.pub-fig .figure-motion-layer { pointer-events: none; }
+.pub-fig .figure-trace {
+  fill: none;
+  stroke: var(--figure-accent);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+.pub-fig .figure-tracer-halo {
+  fill: var(--figure-accent);
+  stroke: none;
+  opacity: .14;
+}
+.pub-fig .figure-tracer-dot {
+  fill: var(--figure-accent);
+  stroke: var(--paper);
+  stroke-width: 1.2;
+}
+.pub-fig .figure-node-highlight {
+  fill: var(--figure-accent);
+  fill-opacity: .16;
+  stroke: var(--figure-accent);
+  stroke-width: 1.8;
+  opacity: 0;
+}
+.pub-fig .figure-cursor {
+  opacity: 0;
+  transition: opacity var(--figure-fade) var(--figure-ease);
+}
+.pub-fig[data-figure-active="true"] .figure-cursor { opacity: 1; }
+.pub-fig[data-figure-active="false"] .figure-motion-layer { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .pub-fig.figures-interactive,
+  .pub-fig .figure-cursor { transition: none; }
+  .pub-fig:not([data-figure-interacting="true"]) .figure-motion-layer { opacity: 0; }
+}

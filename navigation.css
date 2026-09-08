@@ -1,0 +1,2 @@
+.side-toc{top:96px;transform:none;cursor:grab;touch-action:none}.side-toc>a{width:44px;height:20px}.side-toc.is-dragging{cursor:grabbing;user-select:none;opacity:1;pointer-events:auto}.side-toc.is-dragging>a:before{background:var(--muted);opacity:1}.side-toc.is-dragging>a.is-active span{opacity:1;transform:translate(0,-50%)}html:has(.side-toc.is-dragging){scroll-behavior:auto}
+@media(max-width:1079px){.side-toc{display:none}}

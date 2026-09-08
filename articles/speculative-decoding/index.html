@@ -17,24 +17,26 @@
   <script>
     (function () {
       try {
-        var t = localStorage.getItem("theme");
-        if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        var t = localStorage.getItem("reference-theme");
+        if (!t) t = "light";
         document.documentElement.setAttribute("data-theme", t);
       } catch (e) {}
     })();
   </script>
-  <link rel="preload" href="/assets/fonts/fraunces-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/assets/fonts/newsreader-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/assets/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="preload" href="/assets/serif.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/mono.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/site.css?v=blue-section-headings-1">
+  <link rel="stylesheet" href="/article.css?v=article-scenes-1">
+  <link rel="stylesheet" href="/navigation.css?v=landscape-4">
 </head>
-<body>
+<body class="article-page" data-article-background="tides">
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <header class="site-head">
+  <header class="site-head" id="top">
     <div class="wrap bar">
       <a class="wordmark" href="/">Ali Janati<span class="dot">.</span></a>
-      <nav class="site-nav" aria-label="Site">
+      <nav class="site-nav" id="site-nav" aria-label="Site">
         <a href="/#papers">Papers</a>
         <a href="/#articles">Articles</a>
         <a href="/#open-source">Open source</a>
@@ -42,22 +44,43 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 2v14a7 7 0 0 1 0-14z" fill="currentColor"/></svg>
         </button>
       </nav>
+      <button class="menu-toggle" type="button" aria-label="Navigation menu" aria-expanded="false" aria-controls="site-nav" data-preview-ui><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h7"/></svg></button>
     </div>
   </header>
 
-  <main id="main" class="wrap">
-    <header class="article-head">
-      <p class="crumbs"><a href="/#articles">Articles</a> / Speculative decoding</p>
-      <h1>Speculative decoding from scratch, including across tokenizers</h1>
-      <p class="meta">Aug 2026 &middot; Code: <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/speculative_decoding/speculative_decoding.py" target="_blank" rel="noopener">speculative_decoding/speculative_decoding.py</a></p>
+  <nav class="side-toc" aria-label="Contents" data-preview-ui inert>
+      <a href="#the-accept-reject-core" aria-label="The accept-reject core"><span>The accept-reject core</span></a>
+      <a href="#universal-assisted-generation-drafting-across-tokenizers" aria-label="Universal Assisted Generation: drafting across tokenizers"><span>Universal Assisted Generation: drafting across tokenizers</span></a>
+      <a href="#training-the-draft-to-agree" aria-label="Training the draft to agree"><span>Training the draft to agree</span></a>
+  </nav>
+
+  <main id="main" class="article-main">
+    <header class="article-head cover" aria-labelledby="cover-title" data-sky-mode="day">
+      <div id="sky-scene" aria-hidden="true"></div>
+      <div class="cover-words">
+        <p class="crumbs" data-sky-shelter="date"><a href="/#articles">Articles</a> / Speculative decoding</p>
+        <h1 id="cover-title" data-sky-shelter="title">Speculative decoding from scratch, including across tokenizers</h1>
+        <p class="meta">Aug 2026 &middot; Code: <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/speculative_decoding/speculative_decoding.py" target="_blank" rel="noopener">speculative_decoding/speculative_decoding.py</a></p>
+        <nav class="cover-index" aria-label="Contents" data-sky-shelter="index" data-preview-ui>
+          <a class="cover-index-row" href="#the-accept-reject-core"><span class="index-number">[1]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>The accept-reject core</span></a>
+          <a class="cover-index-row" href="#universal-assisted-generation-drafting-across-tokenizers"><span class="index-number">[2]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Universal Assisted Generation: drafting across tokenizers</span></a>
+          <a class="cover-index-row" href="#training-the-draft-to-agree"><span class="index-number">[3]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Training the draft to agree</span></a>
+        </nav>
+      </div>
+      <div class="sky-modes" role="group" aria-label="Sky appearance" data-preview-ui>
+        <button type="button" data-sky-mode="day" aria-label="Day" aria-pressed="true"></button>
+        <button type="button" data-sky-mode="night" aria-label="Night" aria-pressed="false"></button>
+        <button type="button" data-sky-mode="dawn" aria-label="Dawn" aria-pressed="false"></button>
+      </div>
     </header>
 
-    <article class="article-body">
+    <article class="article-body wrap" id="article-introduction">
       <p>Speculative decoding buys latency with a second, smaller model: the draft model proposes gamma tokens autoregressively, the target model scores all of them in a single forward pass, and an accept-reject rule keeps the longest prefix that the target model agrees with. Done correctly, the output distribution is exactly the target model's; the speedup comes from accepting several tokens per target pass. I implemented it from scratch on the repository's own models, then extended it to the case nobody's tutorial covers: a draft model with a different tokenizer.</p>
 
-      <h2>The accept-reject core</h2>
+      <h2 id="the-accept-reject-core">The accept-reject core</h2>
       <p>For each drafted token, compare the target probability against the draft probability and accept with probability min(1, p_target divided by p_draft). A token drafted with higher confidence than the target would give gets accepted proportionally less often. Acceptance must be a prefix, so a cumulative product turns the per-token accept mask into the accepted run length.</p>
-      <pre><code># verify all gamma draft tokens in one target pass
+      <figure class="code-figure">
+        <pre tabindex="0" aria-labelledby="code-caption-1"><code># verify all gamma draft tokens in one target pass
 full_target_logits, _ = target_model(draft_context)
 target_logits = full_target_logits[:, start_pos-1:-1, :]
 target_probs = F.softmax(target_logits, dim=-1)
@@ -69,10 +92,12 @@ u = torch.rand_like(alpha)
 accepted_mask = (u &lt;= alpha)
 prefix_mask = accepted_mask.int().cumprod(dim=1).bool()
 number_of_accepted_tokens = prefix_mask.sum(dim=1)</code></pre>
-      <p class="code-cap">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/speculative_decoding/speculative_decoding.py" target="_blank" rel="noopener">speculative_decoding.py</a></p>
+        <figcaption class="code-cap" id="code-caption-1">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/speculative_decoding/speculative_decoding.py" target="_blank" rel="noopener">speculative_decoding.py</a></figcaption>
+      </figure>
 
       <p>Batching adds one decision the single-sequence papers skip: different sequences accept different numbers of tokens, but the batch must stay rectangular. This implementation advances every sequence by the batch minimum, conservative but simple, then repairs at the first disagreement point by sampling from the target distribution there, or takes the free bonus token when every draft was accepted.</p>
-      <pre><code>min_n_accepted = number_of_accepted_tokens.min().item()
+      <figure class="code-figure">
+        <pre tabindex="0" aria-labelledby="code-caption-2"><code>min_n_accepted = number_of_accepted_tokens.min().item()
 
 if min_n_accepted &gt; 0:
     idx = torch.cat([idx, draft_tokens[:, :min_n_accepted]], dim=-1)
@@ -85,12 +110,14 @@ else:
     bonus_probs = F.softmax(full_target_logits[:, -1, :], dim=-1)
     bonus_token = torch.multinomial(bonus_probs, num_samples=1)
     idx = torch.cat((idx, bonus_token), dim=1)</code></pre>
-      <p class="code-cap">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/speculative_decoding/speculative_decoding.py" target="_blank" rel="noopener">speculative_decoding.py</a></p>
+        <figcaption class="code-cap" id="code-caption-2">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/speculative_decoding/speculative_decoding.py" target="_blank" rel="noopener">speculative_decoding.py</a></figcaption>
+      </figure>
       <p>One deliberate simplification to be aware of: at a rejection, the paper resamples from the normalized residual distribution, the positive part of p minus q; this version samples from the target distribution directly, which keeps the code short at the cost of exactness in that branch. The repository keeps an earlier draft of the whole routine in <code>test.py</code>, and comparing the two files is a fair record of how the implementation got refined.</p>
 
-      <h2>Universal Assisted Generation: drafting across tokenizers</h2>
+      <h2 id="universal-assisted-generation-drafting-across-tokenizers">Universal Assisted Generation: drafting across tokenizers</h2>
       <p>Standard speculative decoding assumes draft and target share a vocabulary. The more useful case is often the opposite: the fast model you have does not speak the target's token space. Universal Assisted Generation bridges it through text. Decode the current sequence to a string, re-encode with the draft tokenizer, draft gamma tokens, decode the drafted snippet back to text, re-encode into the target vocabulary, and verify as usual.</p>
-      <pre><code>def universal_speculative_decode(
+      <figure class="code-figure">
+        <pre tabindex="0" aria-labelledby="code-caption-3"><code>def universal_speculative_decode(
     target_model, target_decode, target_encode,
     draft_model, draft_decode, draft_encode,
     prompt_strings, max_new_tokens, gamma, eps=1e-12
@@ -99,10 +126,11 @@ else:
     Performs Universal Assisted Generation (UAG) for models with different
     tokenizers on a batch of prompts, using probabilistic acceptance.
     """</code></pre>
-      <p class="code-cap"><a href="https://github.com/Na00s/PyTorch-Playground/blob/main/speculative_decoding/speculative_decoding.py" target="_blank" rel="noopener">speculative_decoding.py</a></p>
+        <figcaption class="code-cap" id="code-caption-3"><a href="https://github.com/Na00s/PyTorch-Playground/blob/main/speculative_decoding/speculative_decoding.py" target="_blank" rel="noopener">speculative_decoding.py</a></figcaption>
+      </figure>
       <p>The costs are real and worth stating. Re-tokenization can split the drafted text into a different number of target tokens, so the batch truncates to the shortest re-encoding; and getting a draft probability for a target-space token requires walking the draft model along its own tokenization of the same text, token by token. Tokenizations do not always align one-to-one, and the code says so in a comment where the alignment is resolved by taking the first token. The acceptance mathematics is unchanged; everything hard about UAG lives in the translation layer.</p>
 
-      <h2>Training the draft to agree</h2>
+      <h2 id="training-the-draft-to-agree">Training the draft to agree</h2>
       <p>Acceptance rate is the whole game: every rejection wastes drafted tokens. The file includes a temperature-scaled KL-divergence loss module for distilling a draft model toward the target's distributions, softmax against log-softmax with <code>log_target=True</code> and the usual batchmean reduction. A draft model distilled on the target's outputs accepts longer prefixes, which is what turns the mathematics above into wall-clock speedup.</p>
 
       <footer class="article-foot">
@@ -121,6 +149,9 @@ else:
     </div>
   </footer>
 
-  <script src="/assets/js/main.js" defer></script>
+  <script src="/site.js?v=landscape-4" defer></script>
+  <script type="module" src="/sky.js?v=landscape-4"></script>
+  <script src="/navigation.js?v=landscape-4" defer></script>
+  <script type="module" src="/backgrounds.js?v=original-feel-4"></script>
 </body>
 </html>

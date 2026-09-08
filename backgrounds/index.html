@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#faf9f5">
+  <meta name="robots" content="noindex">
+  <title>Background previews · Ali Janati</title>
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/assets/serif.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./gallery.css?v=landscape-4">
+</head>
+<body data-background-gallery>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="gallery-header">
+    <div class="shell header-row">
+      <a class="wordmark" href="/">Ali Janati<span>.</span></a>
+      <a class="back-link" href="/"><span aria-hidden="true">←</span> Back to website</a>
+    </div>
+  </header>
+  <main class="shell" id="main">
+    <div class="gallery-intro">
+      <div><h1>Backgrounds.</h1><p>Five landscapes in the original sky’s palette and grain. Select a scene to explore it in motion.</p></div>
+      <button class="apply-button" id="use-background" type="button">Use this background <span aria-hidden="true">↗</span></button>
+    </div>
+    <section class="preview-frame" aria-label="Live background preview">
+      <div class="preview-toolbar"><p id="selection-label" aria-live="polite"><span class="selection-number">06</span> Original sky</p><span class="preview-note" id="preview-status">Animated · Interactive</span></div>
+      <div class="cover" data-sky-mode="day">
+        <div id="sky-scene" aria-hidden="true"></div>
+        <div class="cover-words">
+          <p class="role" data-sky-shelter="date">Research in deep learning.</p>
+          <h2 class="preview-title" data-sky-shelter="title">Ali Janati<span>.</span></h2>
+        </div>
+      </div>
+    </section>
+    <div class="background-options" role="group" aria-label="Background options">
+      <button class="background-option" type="button" data-background-id="fuji" aria-pressed="false" aria-label="Preview Mount Fuji">
+        <span class="thumbnail"><img src="/backgrounds/previews/landscape-fuji.png?v=original-feel-4" alt="" loading="lazy" width="480" height="300"><video muted playsinline loop preload="metadata" aria-hidden="true" tabindex="-1" poster="/backgrounds/previews/landscape-fuji.png?v=original-feel-4"><source src="/backgrounds/previews/landscape-fuji.webm?v=original-feel-4" type="video/webm"></video></span>
+        <span class="option-label"><span class="option-number">01</span><span>Mount Fuji</span></span>
+        <span class="option-description">Still water beneath Mount Fuji.</span>
+      </button>
+      <button class="background-option" type="button" data-background-id="forest" aria-pressed="false" aria-label="Preview Forest mist">
+        <span class="thumbnail"><img src="/backgrounds/previews/landscape-forest.png?v=original-feel-4" alt="" loading="lazy" width="480" height="300"><video muted playsinline loop preload="metadata" aria-hidden="true" tabindex="-1" poster="/backgrounds/previews/landscape-forest.png?v=original-feel-4"><source src="/backgrounds/previews/landscape-forest.webm?v=original-feel-4" type="video/webm"></video></span>
+        <span class="option-label"><span class="option-number">02</span><span>Forest mist</span></span>
+        <span class="option-description">Mist moves through the trees.</span>
+      </button>
+      <button class="background-option" type="button" data-background-id="coast" aria-pressed="false" aria-label="Preview Pacific coast">
+        <span class="thumbnail"><img src="/backgrounds/previews/landscape-coast.png?v=original-feel-4" alt="" loading="lazy" width="480" height="300"><video muted playsinline loop preload="metadata" aria-hidden="true" tabindex="-1" poster="/backgrounds/previews/landscape-coast.png?v=original-feel-4"><source src="/backgrounds/previews/landscape-coast.webm?v=original-feel-4" type="video/webm"></video></span>
+        <span class="option-label"><span class="option-number">03</span><span>Pacific coast</span></span>
+        <span class="option-description">The coastline meets the open sea.</span>
+      </button>
+      <button class="background-option" type="button" data-background-id="hills" aria-pressed="false" aria-label="Preview Coastal hills">
+        <span class="thumbnail"><img src="/backgrounds/previews/landscape-hills.png?v=original-feel-4" alt="" loading="lazy" width="480" height="300"><video muted playsinline loop preload="metadata" aria-hidden="true" tabindex="-1" poster="/backgrounds/previews/landscape-hills.png?v=original-feel-4"><source src="/backgrounds/previews/landscape-hills.webm?v=original-feel-4" type="video/webm"></video></span>
+        <span class="option-label"><span class="option-number">04</span><span>Coastal hills</span></span>
+        <span class="option-description">Light moves across the hills.</span>
+      </button>
+      <button class="background-option" type="button" data-background-id="tides" aria-pressed="false" aria-label="Preview Black sand">
+        <span class="thumbnail"><img src="/backgrounds/previews/landscape-tides.png?v=original-feel-4" alt="" loading="lazy" width="480" height="300"><video muted playsinline loop preload="metadata" aria-hidden="true" tabindex="-1" poster="/backgrounds/previews/landscape-tides.png?v=original-feel-4"><source src="/backgrounds/previews/landscape-tides.webm?v=original-feel-4" type="video/webm"></video></span>
+        <span class="option-label"><span class="option-number">05</span><span>Black sand</span></span>
+        <span class="option-description">Water traces patterns in the sand.</span>
+      </button>
+      <button class="background-option is-selected" type="button" data-background-id="original" aria-pressed="true" aria-label="Preview Original sky">
+        <span class="thumbnail"><img src="/backgrounds/previews/landscape-original.png?v=original-feel-4" alt="" loading="lazy" width="480" height="300"><video muted playsinline loop preload="metadata" aria-hidden="true" tabindex="-1" poster="/backgrounds/previews/landscape-original.png?v=original-feel-4"><source src="/backgrounds/previews/landscape-original.webm?v=original-feel-4" type="video/webm"></video></span>
+        <span class="option-label"><span class="option-number">06</span><span>Original sky</span></span>
+        <span class="option-description">The original background.</span>
+      </button>
+    </div>
+    <p class="photo-credit" id="photo-credit"></p>
+    <p class="gallery-footnote">Select a scene above to explore it in motion.</p>
+  </main>
+  <script type="module" src="/sky.js?v=landscape-4"></script>
+  <script type="module" src="/backgrounds.js?v=original-feel-4"></script>
+  <script type="module" src="./gallery.js?v=landscape-4"></script>
+</body>
+</html>
