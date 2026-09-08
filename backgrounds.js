@@ -1,6 +1,5 @@
-// Article covers have their own scenes; the homepage retains the visitor's selection.
+// Each page has a fixed background: Mount Fuji for the homepage and its own scene for each article.
 const ids = ['fuji', 'forest', 'coast', 'hills', 'tides', 'original'];
-const storageKey = 'reference-landscape-study';
 const host = document.querySelector('#sky-scene');
 const cover = host?.closest('.cover');
 let current = 'original';
@@ -9,20 +8,11 @@ let loading = false;
 let sceneModule;
 
 function selection() {
-  const query = new URLSearchParams(location.search).get('background');
-  if (ids.includes(query)) return query;
   const article = document.body.dataset.articleBackground;
-  if (ids.includes(article)) return article;
-  if (!document.body.hasAttribute('data-background-gallery')) {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (ids.includes(saved)) return saved;
-    } catch (_) {}
-  }
-  return document.body.hasAttribute('data-background-gallery') ? 'fuji' : 'original';
+  return ids.includes(article) ? article : 'fuji';
 }
 
-async function apply(id, { persist = false } = {}) {
+async function apply(id) {
   if (!ids.includes(id)) id = 'original';
   const revision = ++request;
   if (!host || !window.__skyPreview) return 'original';
@@ -40,9 +30,6 @@ async function apply(id, { persist = false } = {}) {
     }
     current = id;
     cover.dataset.background = id;
-    if (persist) {
-      try { localStorage.setItem(storageKey, id); } catch (_) {}
-    }
     window.dispatchEvent(new CustomEvent('backgroundchange', { detail: { id } }));
     return id;
   } catch (error) {

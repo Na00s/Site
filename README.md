@@ -10,10 +10,9 @@ The homepage contains Recent, Papers, Articles, Open source, and Contact as cons
 - `navigation.css`, `navigation.js`, `site.js`: section navigation, mobile menu, and theme controls.
 - `sky.js`, `sky/`: interactive sky background and source attribution.
 - `backgrounds.js`, `landscapes/`: photographed landscapes, animation, and photography credits.
-- `backgrounds/`: background selector and animated thumbnails.
 - `assets/docs/CV_Ali.pdf`: CV, also available through `/cv/`.
 
-The original sky is the homepage default. Visitors can select another background at `/backgrounds/`. Article covers have individual scenes. Motion pauses when hidden or offscreen, and reduced-motion preferences receive a still scene.
+The homepage uses the animated Mount Fuji landscape. Article covers have fixed individual scenes: forest for Qwen3-Next, coast for gpt-oss, hills for Gemma, the original sky for Llama, and tides for speculative decoding. Motion pauses when hidden or offscreen, and reduced-motion preferences receive a still scene.
 
 ## Preview
 
