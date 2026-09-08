@@ -1,0 +1,66 @@
+[
+  {
+    "id": "fuji",
+    "title": "Mount Fuji",
+    "credit": "Soyoung HAN",
+    "source": "https://unsplash.com/photos/majestic-mount-fuji-overlooks-a-serene-lake-at-dawn-kWdALpKC1dQ",
+    "image": "assets/fuji.jpg",
+    "width": 2000,
+    "height": 1331,
+    "location": "Lake Motosu, Japan",
+    "original": "https://images.unsplash.com/photo-1767877200197-0e3e88948b1d",
+    "description": "Mount Fuji beyond Lake Motosu at dusk.",
+    "license": "https://unsplash.com/license"
+  },
+  {
+    "id": "forest",
+    "title": "Forest mist",
+    "credit": "Oleksii Rozanov",
+    "source": "https://unsplash.com/photos/misty-forest-with-tall-pine-trees-on-a-hillside-_bN1UXyRSj0",
+    "image": "assets/forest.jpg",
+    "width": 2000,
+    "height": 3000,
+    "original": "https://images.unsplash.com/photo-1773916543957-d370611ac764",
+    "description": "Layers of pine trees disappearing into fog.",
+    "license": "https://unsplash.com/license"
+  },
+  {
+    "id": "coast",
+    "title": "Pacific coast",
+    "credit": "Ronan Furuta",
+    "source": "https://unsplash.com/photos/rocky-coastline-with-calm-ocean-under-cloudy-sky-bJBugcbRXrE",
+    "image": "assets/coast.jpg",
+    "width": 2000,
+    "height": 1333,
+    "location": "Salt Point State Park, California",
+    "original": "https://images.unsplash.com/photo-1768066578241-bbe27f09490e",
+    "description": "A quiet rocky headland along the northern California coast.",
+    "license": "https://unsplash.com/license"
+  },
+  {
+    "id": "hills",
+    "title": "Coastal hills",
+    "credit": "Brian Thompson",
+    "source": "https://unsplash.com/photos/rolling-green-hills-meet-the-ocean-under-a-clear-sky-xDTsdLGbYm4",
+    "image": "assets/hills.jpg",
+    "width": 2000,
+    "height": 1335,
+    "location": "California Central Coast",
+    "original": "https://images.unsplash.com/photo-1769812215401-1429ae7068ed",
+    "description": "Green hills folding toward the Pacific.",
+    "license": "https://unsplash.com/license"
+  },
+  {
+    "id": "tides",
+    "title": "Black sand",
+    "credit": "Jeremy Bishop",
+    "source": "https://unsplash.com/photos/birds-view-of-black-sand-and-body-of-water-GoEWA8YCQJ0",
+    "image": "assets/tides.jpg",
+    "width": 2000,
+    "height": 1333,
+    "location": "Vik, Iceland",
+    "original": "https://images.unsplash.com/photo-1495250357898-6822052ef5b8",
+    "description": "An aerial view of dark sand meeting the sea.",
+    "license": "https://unsplash.com/license"
+  }
+]

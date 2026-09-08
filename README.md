@@ -1,17 +1,26 @@
 # alijanati.com
 
-Personal research site. Static HTML and CSS, no frameworks, no build step.
+Personal research site. Static HTML, CSS, and JavaScript with no build step.
 
-- `index.html` : the whole site. Edit copy directly here.
-- `assets/css/main.css` : design tokens (colors, type) live at the top.
-- `assets/js/main.js` : theme toggle and nav highlighting; the only JS.
-- `assets/docs/CV_Ali.pdf` : the CV served at `/assets/docs/CV_Ali.pdf`.
+The homepage contains Recent, Papers, Articles, Open source, and Contact as consecutive scrolling sections. Paper and project titles link directly to their primary sources. Five article pages share the site layout.
 
-Push to `main` and GitHub Actions deploys to GitHub Pages (`.github/workflows/deploy.yml`).
+- `index.html`: homepage copy, links, and SVG illustrations.
+- `site.css`, `content.css`, `article.css`: typography, colors, and page layouts.
+- `figures.css`, `figures.js`: animated diagrams and pointer, touch, and keyboard interactions.
+- `navigation.css`, `navigation.js`, `site.js`: section navigation, mobile menu, and theme controls.
+- `sky.js`, `sky/`: interactive sky background and source attribution.
+- `backgrounds.js`, `landscapes/`: photographed landscapes, animation, and photography credits.
+- `backgrounds/`: background selector and animated thumbnails.
+- `assets/docs/CV_Ali.pdf`: CV, also available through `/cv/`.
 
-## Adding things
+The original sky is the homepage default. Visitors can select another background at `/backgrounds/`. Article covers have individual scenes. Motion pauses when hidden or offscreen, and reduced-motion preferences receive a still scene.
 
-- **A paper**: copy a `<li class="pub">` block in `index.html`, update title/authors/links, and draw a new 92×92 SVG thumbnail in the same inline style.
-- **An open-source entry**: copy a `<li class="project">` block.
-- **An article**: create `articles/<slug>/index.html` from an existing article page, add a row to the Articles list in `index.html`, and add the URL to `sitemap.xml`.
-- **A news item**: add a `<li>` at the top of the Recent list.
+## Preview
+
+Run `python3 -m http.server 8765 --bind 127.0.0.1` and open http://localhost:8765/.
+
+## Edit content
+
+For a paper, article, or project, copy the corresponding entry in `index.html` and update its text and source links. New articles live at `articles/<slug>/index.html`; add their canonical URL to `sitemap.xml`. Add news items to the Recent list.
+
+Push to `main` and `.github/workflows/deploy.yml` deploys to GitHub Pages.

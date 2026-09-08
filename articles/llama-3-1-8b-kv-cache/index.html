@@ -17,24 +17,26 @@
   <script>
     (function () {
       try {
-        var t = localStorage.getItem("theme");
-        if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        var t = localStorage.getItem("reference-theme");
+        if (!t) t = "light";
         document.documentElement.setAttribute("data-theme", t);
       } catch (e) {}
     })();
   </script>
-  <link rel="preload" href="/assets/fonts/fraunces-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/assets/fonts/newsreader-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/assets/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="preload" href="/assets/serif.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/mono.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/site.css?v=blue-section-headings-1">
+  <link rel="stylesheet" href="/article.css?v=article-scenes-1">
+  <link rel="stylesheet" href="/navigation.css?v=landscape-4">
 </head>
-<body>
+<body class="article-page" data-article-background="original">
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <header class="site-head">
+  <header class="site-head" id="top">
     <div class="wrap bar">
       <a class="wordmark" href="/">Ali Janati<span class="dot">.</span></a>
-      <nav class="site-nav" aria-label="Site">
+      <nav class="site-nav" id="site-nav" aria-label="Site">
         <a href="/#papers">Papers</a>
         <a href="/#articles">Articles</a>
         <a href="/#open-source">Open source</a>
@@ -42,41 +44,68 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 2v14a7 7 0 0 1 0-14z" fill="currentColor"/></svg>
         </button>
       </nav>
+      <button class="menu-toggle" type="button" aria-label="Navigation menu" aria-expanded="false" aria-controls="site-nav" data-preview-ui><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h7"/></svg></button>
     </div>
   </header>
 
-  <main id="main" class="wrap">
-    <header class="article-head">
-      <p class="crumbs"><a href="/#articles">Articles</a> / Llama 3.1 8B</p>
-      <h1>Llama 3.1 8B with a hand-written KV cache</h1>
-      <p class="meta">Aug 2026 &middot; Code: <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/llama_3.1_8B/model.py" target="_blank" rel="noopener">llama_3.1_8B/model.py</a></p>
+  <nav class="side-toc" aria-label="Contents" data-preview-ui inert>
+      <a href="#grouped-queries-without-repeat-kv" aria-label="Grouped queries without repeat_kv"><span>Grouped queries without repeat_kv</span></a>
+      <a href="#rope-has-to-know-where-it-is" aria-label="RoPE has to know where it is"><span>RoPE has to know where it is</span></a>
+      <a href="#the-cache-itself-is-concatenation" aria-label="The cache itself is concatenation"><span>The cache itself is concatenation</span></a>
+      <a href="#training-details-that-matter" aria-label="Training details that matter"><span>Training details that matter</span></a>
+  </nav>
+
+  <main id="main" class="article-main">
+    <header class="article-head cover" aria-labelledby="cover-title" data-sky-mode="day">
+      <div id="sky-scene" aria-hidden="true"></div>
+      <div class="cover-words">
+        <p class="crumbs" data-sky-shelter="date"><a href="/#articles">Articles</a> / Llama 3.1 8B</p>
+        <h1 id="cover-title" data-sky-shelter="title">Llama 3.1 8B with a hand-written KV cache</h1>
+        <p class="meta">Aug 2026 &middot; Code: <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/llama_3.1_8B/model.py" target="_blank" rel="noopener">llama_3.1_8B/model.py</a></p>
+        <nav class="cover-index" aria-label="Contents" data-sky-shelter="index" data-preview-ui>
+          <a class="cover-index-row" href="#grouped-queries-without-repeat-kv"><span class="index-number">[1]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Grouped queries without repeat_kv</span></a>
+          <a class="cover-index-row" href="#rope-has-to-know-where-it-is"><span class="index-number">[2]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>RoPE has to know where it is</span></a>
+          <a class="cover-index-row" href="#the-cache-itself-is-concatenation"><span class="index-number">[3]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>The cache itself is concatenation</span></a>
+          <a class="cover-index-row" href="#training-details-that-matter"><span class="index-number">[4]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Training details that matter</span></a>
+        </nav>
+      </div>
+      <div class="sky-modes" role="group" aria-label="Sky appearance" data-preview-ui>
+        <button type="button" data-sky-mode="day" aria-label="Day" aria-pressed="true"></button>
+        <button type="button" data-sky-mode="night" aria-label="Night" aria-pressed="false"></button>
+        <button type="button" data-sky-mode="dawn" aria-label="Dawn" aria-pressed="false"></button>
+      </div>
     </header>
 
-    <article class="article-body">
+    <article class="article-body wrap" id="article-introduction">
       <p>Llama 3.1 8B is the closest thing the field has to a reference decoder: 32 layers, hidden size 4096, grouped-query attention with 32 query heads over 8 KV heads, SwiGLU, RMSNorm, RoPE at theta 500,000, vocabulary 128,256. That makes it the right model to attach the one piece of inference machinery everyone uses and few people write by hand: the KV cache. Mine is the only model in the repository that carries one, and it is about twenty lines.</p>
 
-      <h2>Grouped queries without repeat_kv</h2>
+      <h2 id="grouped-queries-without-repeat-kv">Grouped queries without repeat_kv</h2>
       <p>The usual implementation repeats each KV head four times to match the 32 query heads. I skip the copy: reshape queries to five dimensions, grouped by KV head, leave keys and values with a singleton group axis, and let broadcasting do the rest. No <code>repeat_interleave</code>, no materialized copies of K and V, and the grouping is visible in the shapes.</p>
-      <pre><code>repeat_factor = num_attention_heads // num_key_value_heads    # 32 // 8 = 4
+      <figure class="code-figure">
+        <pre tabindex="0" aria-labelledby="code-caption-1"><code>repeat_factor = num_attention_heads // num_key_value_heads    # 32 // 8 = 4
 q = q.reshape(B, num_key_value_heads, repeat_factor, T, head_size)
 k = k.reshape(B, num_key_value_heads, 1, T, head_size)
 v = v.reshape(B, num_key_value_heads, 1, T, head_size)
 scores = q @ k.transpose(-1, -2)    # B, n_kv, 4, T, T via broadcasting</code></pre>
-      <p class="code-cap">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/llama_3.1_8B/model.py" target="_blank" rel="noopener">llama_3.1_8B/model.py</a></p>
+        <figcaption class="code-cap" id="code-caption-1">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/llama_3.1_8B/model.py" target="_blank" rel="noopener">llama_3.1_8B/model.py</a></figcaption>
+      </figure>
 
-      <h2>RoPE has to know where it is</h2>
+      <h2 id="rope-has-to-know-where-it-is">RoPE has to know where it is</h2>
       <p>A cache changes positional encoding in one subtle way: when the model processes token 4097 alone, its rotary angle must correspond to position 4097, not position 0. So the frequency table takes the past length as an offset, and everything else stays vanilla RoPE.</p>
-      <pre><code>@staticmethod
+      <figure class="code-figure">
+        <pre tabindex="0" aria-labelledby="code-caption-2"><code>@staticmethod
 def get_rope_params(theta, length, head_dim, past_len=0):
     freq = theta ** ((-torch.arange(0, head_dim, 2)) / head_dim).unsqueeze(0)
     pos = torch.arange(past_len, past_len + length).unsqueeze(1)   # T, 1
     angles = pos * freq                                            # T, head_dim//2
     return torch.cos(angles), torch.sin(angles)</code></pre>
-      <p class="code-cap"><a href="https://github.com/Na00s/PyTorch-Playground/blob/main/llama_3.1_8B/model.py" target="_blank" rel="noopener">llama_3.1_8B/model.py</a></p>
+        <figcaption class="code-cap" id="code-caption-2"><a href="https://github.com/Na00s/PyTorch-Playground/blob/main/llama_3.1_8B/model.py" target="_blank" rel="noopener">llama_3.1_8B/model.py</a></figcaption>
+      </figure>
 
-      <h2>The cache itself is concatenation</h2>
+      <h2 id="the-cache-itself-is-concatenation">The cache itself is concatenation</h2>
       <p>Each attention layer receives its past keys and values, concatenates the new ones along the time axis, attends over the joined sequence, and hands the joined tensors back as the new past. The score matrix goes rectangular, new queries against all keys, so the mask does too.</p>
-      <pre><code>past_length = 0 if past_k is None else past_k.size(2)
+      <figure class="code-figure">
+        <pre tabindex="0" aria-labelledby="code-caption-3"><code>past_length = 0 if past_k is None else past_k.size(2)
 cos, sin = self.get_rope_params(rope_theta, T, head_size, past_len=past_length)
 q, k = self.apply_rope(q, cos, sin), self.apply_rope(k, cos, sin)
 
@@ -94,10 +123,11 @@ ctx = scores @ v_all
 
 present = (k_all, v_all) if use_cache else None
 return x, present</code></pre>
-      <p class="code-cap">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/llama_3.1_8B/model.py" target="_blank" rel="noopener">the attention forward</a></p>
+        <figcaption class="code-cap" id="code-caption-3">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/llama_3.1_8B/model.py" target="_blank" rel="noopener">the attention forward</a></figcaption>
+      </figure>
       <p>The model's forward threads a list of per-layer pasts down the stack and collects the presents on the way back up. That is the entire mechanism behind fast autoregressive decoding: prefill once, then each step pays for one token of attention instead of the whole sequence.</p>
 
-      <h2>Training details that matter</h2>
+      <h2 id="training-details-that-matter">Training details that matter</h2>
       <p>The loss does the causal shift explicitly, logits against next tokens, with <code>ignore_index=-100</code> for padding, and the SwiGLU feed-forward is a one-liner: <code>fc3(silu(fc2(x)) * fc1(x))</code>. The config carries Llama 3.1's long-context RoPE scaling fields, the 8x factor and the low and high frequency cutoffs; this implementation keeps rotary vanilla and treats the frequency-dependent scaling as a documented extension, the same config-as-map convention as the rest of the repository. The file also keeps hand-written RMSNorm and LayerNorm classes at the bottom as reference implementations, spare parts for teaching.</p>
 
       <footer class="article-foot">
@@ -116,6 +146,9 @@ return x, present</code></pre>
     </div>
   </footer>
 
-  <script src="/assets/js/main.js" defer></script>
+  <script src="/site.js?v=landscape-4" defer></script>
+  <script type="module" src="/sky.js?v=landscape-4"></script>
+  <script src="/navigation.js?v=landscape-4" defer></script>
+  <script type="module" src="/backgrounds.js?v=original-feel-4"></script>
 </body>
 </html>
