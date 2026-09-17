@@ -46,14 +46,14 @@ export const LANDSCAPE_SCENES = {
     exposure: .12, softness: 1.6, grain: .030,
   },
   lake: {
-    // Mountain over a still lake at dawn. The shoreline runs level at .67; the
-    // cloud band sits around the mountain's base between .48 and .63.
-    crop: [.51,.50], mobileCrop: [.51,.50], kind: 6,
-    water: [[0,.672],[1,.672],[1,1],[0,1]], water2: [],
-    waterTop: .66, waterBottom: 1, waterFeather: .02,
-    waterStrength: .0011, waterBrightness: .005,
-    mistCenter: [.50,.56], mistRadius: [.60,.075], mistStrength: .022,
-    mistColor: [.86,.84,.86], shadowStrength: 0,
+    // Fog on a still lake at sunrise. The treeline meets the water at .62; the
+    // fog lies on the water between .60 and .71, and the reflection fills the rest.
+    crop: [.50,.55], mobileCrop: [.50,.55], kind: 6,
+    water: [[0,.625],[1,.625],[1,1],[0,1]], water2: [],
+    waterTop: .62, waterBottom: 1, waterFeather: .02,
+    waterStrength: .0013, waterBrightness: .006,
+    mistCenter: [.50,.655], mistRadius: [.64,.058], mistStrength: .065,
+    mistColor: [.78,.77,.78], shadowStrength: 0,
     exposure: .10, softness: 1.8, grain: .030,
   },
 };
@@ -120,8 +120,8 @@ vec3 filmColor(vec3 source) {
   } else if (uKind > 4.5 && uKind < 5.5) {
     warmth = smoothstep(.58,.94,value)*.84;
   } else if (uKind > 5.5) {
-    // The lake keeps its photographed dawn: pink cloud and lit peak stay warm,
-    // the blue sky and the water stay cool.
+    // The lake keeps its photographed sunrise: the glow at the horizon and its
+    // reflection stay warm, the clouds and the fog stay cool.
     warmth = smoothstep(-.03,.17,source.r-source.b) * smoothstep(.26,.70,value)*.90;
   }
   vec3 color = mix(cool,warm,warmth);

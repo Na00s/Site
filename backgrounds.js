@@ -21,7 +21,7 @@ async function apply(id) {
   try {
     let factory;
     if (id !== 'original') {
-      sceneModule ||= import('./landscapes/scene.js?v=lake-scene-1');
+      sceneModule ||= import('./landscapes/scene.js?v=lake-scene-2');
       factory = (await sceneModule).createLandscapeHero;
     }
     if (revision !== request) return current;

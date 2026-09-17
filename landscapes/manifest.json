@@ -65,14 +65,14 @@
   },
   {
     "id": "lake",
-    "title": "Mountain lake at dawn",
-    "credit": "Valentin",
-    "source": "https://unsplash.com/photos/misty-mountains-rise-above-a-calm-lake-at-dawn-C3XFOAc2Va8",
+    "title": "Misty lake at sunrise",
+    "credit": "Scott Goodwill",
+    "source": "https://unsplash.com/photos/misty-lake-reflecting-sunrise-over-mountains-and-forest-MprDXksPXlE",
     "image": "assets/lake.jpg",
     "width": 2000,
-    "height": 1500,
-    "original": "https://images.unsplash.com/photo-1774112034535-f037b32b5884",
-    "description": "A mountain rising out of low cloud above a still lake at dawn.",
+    "height": 1338,
+    "original": "https://images.unsplash.com/photo-1779378027650-3930e4d9f429",
+    "description": "Fog lying on a still lake at sunrise, with forest and mountains behind.",
     "license": "https://unsplash.com/license"
   }
 ]

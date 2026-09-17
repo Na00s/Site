@@ -12,7 +12,7 @@ The homepage contains Recent, Papers, Articles, Open source, and Contact as cons
 - `backgrounds.js`, `landscapes/`: photographed landscapes, animation, and photography credits.
 - `assets/docs/CV_Ali.pdf`: CV, also available through `/cv/`.
 
-The homepage uses the animated Mount Fuji landscape. Article covers have fixed individual scenes: forest for Qwen3-Next, coast for gpt-oss, hills for Gemma, the original sky for Llama, tides for speculative decoding, and a mountain lake at dawn for Transformer optimization 101. Motion pauses when hidden or offscreen, and reduced-motion preferences receive a still scene.
+The homepage uses the animated Mount Fuji landscape. Article covers have fixed individual scenes: forest for Qwen3-Next, coast for gpt-oss, hills for Gemma, the original sky for Llama, tides for speculative decoding, and a misty lake at sunrise for Transformer optimization 101. Motion pauses when hidden or offscreen, and reduced-motion preferences receive a still scene.
 
 ## Preview
 
