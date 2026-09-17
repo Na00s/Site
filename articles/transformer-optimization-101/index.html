@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Decoder-only Transformer optimization 101 · Ali Janati</title>
+  <meta name="description" content="A tour of the Frisson Labs report on training a decoder-only Transformer to play Melee on one RTX 6000 Pro: tiling, fusion, buffer reuse, CUDA-Oxide, and a smaller model, from 163,645 to 3,217,492 tokens per second.">
+  <link rel="canonical" href="https://alijanati.com/articles/transformer-optimization-101/">
+  <meta name="author" content="Ali Janati">
+  <meta name="theme-color" content="#f6f1e6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#191410" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Decoder-only Transformer optimization 101">
+  <meta property="og:description" content="From 163,645 to 3,217,492 tokens per second on one GPU: what each optimization step bought, and what it cost.">
+  <meta property="og:image" content="https://alijanati.com/assets/images/og.png">
+  <link rel="icon" href="/favicon.ico?v=fuji-icon-1" sizes="16x16 32x32 48x48">
+  <link rel="icon" href="/assets/images/favicon.svg?v=fuji-icon-1" type="image/svg+xml" sizes="any">
+  <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png?v=fuji-icon-1" sizes="180x180">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("reference-theme");
+        if (!t) t = "light";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preload" href="/assets/serif.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/mono.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/site.css?v=blue-section-headings-1">
+  <link rel="stylesheet" href="/article.css?v=article-scenes-1">
+  <link rel="stylesheet" href="/navigation.css?v=landscape-4">
+</head>
+<body class="article-page" data-article-background="lake">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-head" id="top">
+    <div class="wrap bar">
+      <a class="wordmark" href="/">Ali Janati<span class="dot">.</span></a>
+      <nav class="site-nav" id="site-nav" aria-label="Site">
+        <a href="/#papers">Papers</a>
+        <a href="/#articles">Articles</a>
+        <a href="/#open-source">Open source</a>
+        <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Light / dark">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 2v14a7 7 0 0 1 0-14z" fill="currentColor"/></svg>
+        </button>
+      </nav>
+      <button class="menu-toggle" type="button" aria-label="Navigation menu" aria-expanded="false" aria-controls="site-nav" data-preview-ui><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h7"/></svg></button>
+    </div>
+  </header>
+
+  <nav class="side-toc" aria-label="Contents" data-preview-ui inert>
+      <a href="#the-question-and-the-model" aria-label="The question and the model"><span>The question and the model</span></a>
+      <a href="#m1-faster-matrix-multiplies" aria-label="m1: faster matrix multiplies"><span>m1: faster matrix multiplies</span></a>
+      <a href="#m2-fusion-and-flashattention" aria-label="m2: fusion and FlashAttention"><span>m2: fusion and FlashAttention</span></a>
+      <a href="#m3-stop-allocating-zeroing-and-freeing" aria-label="m3: stop allocating, zeroing, and freeing"><span>m3: stop allocating, zeroing, and freeing</span></a>
+      <a href="#r16-cuda-oxide-one-sweep-two-streams" aria-label="r16: CUDA-Oxide, one sweep, two streams"><span>r16: CUDA-Oxide, one sweep, two streams</span></a>
+      <a href="#x2-a-smaller-model-on-every-other-frame" aria-label="x2: a smaller model on every other frame"><span>x2: a smaller model on every other frame</span></a>
+      <a href="#what-carries-over" aria-label="What carries over"><span>What carries over</span></a>
+  </nav>
+
+  <main id="main" class="article-main">
+    <header class="article-head cover" aria-labelledby="cover-title" data-sky-mode="day">
+      <div id="sky-scene" aria-hidden="true"></div>
+      <div class="cover-words">
+        <p class="crumbs" data-sky-shelter="date"><a href="/#articles">Articles</a> / Transformer optimization 101</p>
+        <h1 id="cover-title" data-sky-shelter="title">Decoder-only Transformer optimization 101: 164K to 3.2M tokens/s on one GPU</h1>
+        <p class="meta">Sep 2026 &middot; Report: <a href="https://www.frisson-labs.com/decoder-only-transformer-optimization-101" target="_blank" rel="noopener">Decoder-Only Transformer Optimization 101</a>, Frisson Labs &middot; With TongKe Xue, Rohit Swamy, Eric Gu, Nikita Kuzmin, Charles Niu, and Tod Sophon</p>
+        <nav class="cover-index" aria-label="Contents" data-sky-shelter="index" data-preview-ui>
+          <a class="cover-index-row" href="#the-question-and-the-model"><span class="index-number">[1]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>The question and the model</span></a>
+          <a class="cover-index-row" href="#m1-faster-matrix-multiplies"><span class="index-number">[2]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>m1: faster matrix multiplies</span></a>
+          <a class="cover-index-row" href="#m2-fusion-and-flashattention"><span class="index-number">[3]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>m2: fusion and FlashAttention</span></a>
+          <a class="cover-index-row" href="#m3-stop-allocating-zeroing-and-freeing"><span class="index-number">[4]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>m3: stop allocating, zeroing, and freeing</span></a>
+          <a class="cover-index-row" href="#r16-cuda-oxide-one-sweep-two-streams"><span class="index-number">[5]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>r16: CUDA-Oxide, one sweep, two streams</span></a>
+          <a class="cover-index-row" href="#x2-a-smaller-model-on-every-other-frame"><span class="index-number">[6]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>x2: a smaller model on every other frame</span></a>
+          <a class="cover-index-row" href="#what-carries-over"><span class="index-number">[7]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>What carries over</span></a>
+        </nav>
+      </div>
+      <div class="sky-modes" role="group" aria-label="Sky appearance" data-preview-ui>
+        <button type="button" data-sky-mode="day" aria-label="Day" aria-pressed="true"></button>
+        <button type="button" data-sky-mode="night" aria-label="Night" aria-pressed="false"></button>
+        <button type="button" data-sky-mode="dawn" aria-label="Dawn" aria-pressed="false"></button>
+      </div>
+    </header>
+
+    <article class="article-body wrap" id="article-introduction">
+      <p>At Frisson Labs we are building AI that plays games with you. In September we put out a report built around one narrow question: how fast can a single RTX 6000 Pro train a decoder-only Transformer to play Super Smash Bros. Melee well enough to beat a level-9 CPU Fox? The naive implementation ran at 163,645 tokens per second. The final one runs at 3,217,492, and after ten minutes of training it still wins 26 games out of 30. This is a walk through the five steps in between and what each one bought.</p>
+
+      <h2 id="the-question-and-the-model">The question and the model</h2>
+      <p>The model is Eric Gu's HAL-20M: a six-layer decoder-only Transformer with width 512, eight heads of 64, and a 2048-wide MLP, about 20 million parameters. It reads 256 frames of game state and predicts the controller autoregressively, c-stick first, then main stick, then buttons. We picked it because it is the language-model pretraining workload in miniature. Causal attention, matrix multiplies, MLPs, backpropagation, and optimizer updates are all there; the tokens happen to be Melee frames. A batch is 512 windows of 256 frames, so 131,072 tokens per step.</p>
+      <p>Two things made this a different kind of speedrun. The target is gameplay, and next-token error is only a proxy for it, so every configuration is judged on 30 games against the level-9 CPU on Final Destination, with stocks taken, stocks lost, and damage dealt and taken tracked over the first twenty minutes of training. And the run is split in two stages. In the first, the architecture is frozen and every gain comes from running the same computation better on the GPU. In the second, the architecture may change as long as the model still beats the CPU.</p>
+      <p>For reference, PyTorch eager in BF16 does 401,766 tokens per second on this model, and torch.compile in BF16 does 918,193, although some width-512 BF16 runs in PyTorch developed non-finite gradients or diverged and we never isolated why. Our own kernels are written in Rust, first through cuTile-rs and later through CUDA-Oxide, and the naive cuTile-rs version starts well below PyTorch.</p>
+      <table>
+        <thead>
+          <tr><th>Stage</th><th>What changed</th><th>Tokens/s</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>m0</td><td>Naive cuTile-rs: basic tiled GEMMs, unfused Transformer</td><td>163,645</td></tr>
+          <tr><td>m1</td><td>Larger GEMM tiles and split-K</td><td>207,146</td></tr>
+          <tr><td>m2</td><td>Fused pointwise ops and reductions, two-sweep FlashAttention</td><td>445,372</td></tr>
+          <tr><td>m3</td><td>No zero-fills, buffer reuse, CUDA graph replay, overlapped input preparation</td><td>660,540</td></tr>
+          <tr><td>r16</td><td>CUDA-Oxide: pipelined GEMMs, fused epilogues, one-sweep attention, two streams</td><td>1,125,109</td></tr>
+          <tr><td>x2</td><td>Every other frame, half the width</td><td>3,217,492</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="m1-faster-matrix-multiplies">m1: faster matrix multiplies</h2>
+      <p>Two changes to the GEMMs take m0 from 163,645 to 207,146 tokens per second. The first is tiling. Both versions run on Tensor Cores with BF16 inputs and FP32 accumulation, but the old kernel gave each thread block a 16 by 64 output tile and the new one gives it 128 by 128. Every element of A and B a block loads is reused across far more output elements, so the kernel spends less of its time waiting on memory.</p>
+      <p>The second is split-K for the gradient reductions. A weight gradient is a long sum over batch and sequence, and a long reduction with few output tiles cannot fill the GPU. Split-K cuts the reduction into k segments, computes their partial sums in parallel, and adds them in a second kernel. The profile shows where this lands: the QKV projection drops from 4.77 to 2.57 ms per layer in the forward pass, the two MLP GEMMs from 5.61 and 4.64 to 2.67 and 1.66, and the relative-position gradient in the backward pass from 6.80 to 1.91. Forward kernel time per layer goes from 40.48 to 31.66 ms, backward from 50.35 to 39.23.</p>
+
+      <h2 id="m2-fusion-and-flashattention">m2: fusion and FlashAttention</h2>
+      <p>Fusion is the general trick. If y = g(f(x)) and both functions are elementwise, compute both inside one kernel and keep the intermediate in a register. That removes the read of the intermediate tensor, and when the backward pass does not need it, the write as well. We applied it to the pointwise ops and reductions around every layer.</p>
+      <figure class="code-figure">
+        <pre tabindex="0" aria-labelledby="code-caption-1"><code># old: two kernels, U round-trips through global memory
+kernel_1:  parallel for i in 0..N:  x = load(X[i]); u = round_U(f(x)); store(U[i], u)
+kernel_2:  parallel for i in 0..N:  u = load(U[i]); y = g(u); store(Y[i], y)
+
+# new: one kernel, u stays in a register
+fused_kernel:
+    parallel for i in 0..N:
+        x = load(X[i])
+        u = round_U(f(x))
+        if backward_needs(U): store(U[i], u)
+        y = g(u)
+        store(Y[i], y)</code></pre>
+        <figcaption class="code-cap" id="code-caption-1">Pseudocode from the <a href="https://www.frisson-labs.com/decoder-only-transformer-optimization-101" target="_blank" rel="noopener">report</a>, section m2</figcaption>
+      </figure>
+      <p>The bigger win is attention. The old path was three kernels: one wrote the full T by T score matrix S to global memory, softmax read it and wrote the full probability matrix P, and a third kernel read P to multiply by V. The fused kernel makes two sweeps over the key tiles for each query tile. The first computes the scores tile by tile and accumulates the row normalizers. The second recomputes the scores, normalizes and rounds each probability tile to BF16, and multiplies it into the output accumulator right away. S and P never touch global memory. Backward rebuilds the probability tiles from the saved row maximum and denominator. The FP32 reduction order changes, so the results are close to the old kernels and not bitwise identical.</p>
+      <figure class="code-figure">
+        <pre tabindex="0" aria-labelledby="code-caption-2"><code>fused_attention: parallel for query tile I:
+    ell = 0                                   # one normalizer per row
+    for J in causal_key_tiles(I):             # sweep 1: softmax statistics
+        s = mask((Q[I] @ K[J].T + R[I,J]) / sqrt(d_h), J &lt;= I)
+        ell += rowsum(exp(s))
+    o = 0
+    for J in causal_key_tiles(I):             # sweep 2: recompute and consume
+        s = mask((Q[I] @ K[J].T + R[I,J]) / sqrt(d_h), J &lt;= I)
+        p = bf16(exp(s) / ell)
+        o += p @ V[J]                         # no global S or P
+    store(O[I], bf16(o))
+    store(norm_stats[I], state(ell))          # max and denominator for backward</code></pre>
+        <figcaption class="code-cap" id="code-caption-2">Condensed from the report. The kernels also subtract the running maximum and rescale online; the pseudocode leaves that out for readability.</figcaption>
+      </figure>
+      <p>This is the largest single step in the first stage. The attention group in the forward pass goes from 18.27 ms per layer to 2.32, and the softmax derivative in the backward pass from 20.97 to 4.85. Forward kernel time per layer drops to 10.68 ms and backward to 19.84, and throughput more than doubles to 445,372 tokens per second.</p>
+
+      <h2 id="m3-stop-allocating-zeroing-and-freeing">m3: stop allocating, zeroing, and freeing</h2>
+      <p>This step changes no arithmetic and adds 48%. For x = a + b, the old code allocated a buffer for x, launched a kernel to zero it, launched the add, which overwrote every element, and freed the buffer afterwards. With hundreds of temporaries per step the fills alone cost 15.74 ms of the 58 ms one forward layer took in the m0 profile. The fix is to allocate reusable storage once at initialization and write results straight into it. A buffer can be reused once its previous value's last consumer has finished, and accumulators that add into an existing value still need initializing. Nothing else does.</p>
+      <table>
+        <thead>
+          <tr><th>Per training step, profiled</th><th>m2</th><th>m3</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Non-initialization kernel time (ms)</td><td>207.03</td><td>206.57</td></tr>
+          <tr><td>Initialization kernel time (ms)</td><td>95.69</td><td>0.01</td></tr>
+          <tr><td>Gaps without traced GPU work (ms)</td><td>57.23</td><td>0.82</td></tr>
+          <tr><td>Initialization kernel launches</td><td>557</td><td>7</td></tr>
+          <tr><td>CUDA allocation requests</td><td>563</td><td>0</td></tr>
+        </tbody>
+      </table>
+      <p>Buffer reuse and zero-fill removal together account for a 47.84% gain in tokens per second; we did not measure them separately. Capturing the whole step in a CUDA graph, so one replay replaces hundreds of host submissions, added 0.36%. Preparing and uploading the next batch during the current step measured at -0.04% in the fixed-batch benchmark, which is noise. m3 runs at 660,540 tokens per second.</p>
+
+      <h2 id="r16-cuda-oxide-one-sweep-two-streams">r16: CUDA-Oxide, one sweep, two streams</h2>
+      <p>cuTile-rs and CUDA-Oxide are both Rust interfaces to the GPU. The difference is that CUDA-Oxide gives control over individual threads, warps, and blocks. The model, the batch, and the sequence length stay exactly what they were in m3. Three things changed, and together they take throughput from 660,540 to 1,125,109 tokens per second, 116.5 ms per batch.</p>
+      <p>Pipeline control. Blocks load the next operand tile while the Tensor Cores compute the current one, so the compute units are not idle during loads. The GEMM epilogues fuse the bias, the dropout, and the residual add, so the output projection produces R1 = X + dropout(C Wo<sup>T</sup> + bo) in one kernel and the intermediate never lands in memory. Other projections store directly in the layout the next kernel wants.</p>
+      <p>One-sweep attention. The two-sweep kernel from m2 recomputed the scores. The CUDA-Oxide kernel computes each score tile once, relative-position term included, and immediately accumulates the weighted values and the row normalizer, dividing at the end. It keeps a running maximum and rescales both accumulators as the maximum changes. This moves the BF16 rounding from the normalized probabilities to the unnormalized weights, so the floating-point results shift again even though the math is unchanged. Forward avoids the global R, S, and P matrices entirely; backward consumes probability and derivative tiles locally and keeps only dR for the relative-embedding gradient.</p>
+      <p>Two streams. The resource mix shifts during a step: GEMMs live on the Tensor Cores, LayerNorm and dropout live on memory bandwidth. Splitting the 512 sequences into two independent lanes of 256, each with its own workspace, lets one lane's Tensor Core work overlap the other's memory work. After both lanes finish, their gradients are summed, clipped, and applied in a single AdamW update, so the update is the same as the single-batch version up to floating point. In the Nsight capture, kernel overlap covers 36% of the trace.</p>
+      <p>Per layer, forward kernel time falls from 10.57 to 6.40 ms. Backward barely moves, 19.91 to 19.01, which says where the remaining time lives. The kernel sums count both lanes separately, so they can exceed the elapsed step time; part of the gain is overlap that no per-kernel number shows.</p>
+
+      <h2 id="x2-a-smaller-model-on-every-other-frame">x2: a smaller model on every other frame</h2>
+      <p>With the first stage done, the second stage changes the model. Two changes. The CPU keeps frames 0, 2, ..., 254 of each 256-frame window, so 128 frames reach the GPU. And the width halves, 512 to 256, with heads down from eight to four and the MLP from 2048 to 1024. Six layers, 64-wide heads, batch 512, and the two lanes stay. The result is a 5.3M-parameter model at 20.37 ms per batch. Tokens per second here count processed frames, 128 per sequence, so the fair comparison is windows per second: 5.72 times r16. Per-layer kernel time falls from 6.40 to 1.12 ms forward and from 19.01 to 3.13 backward. x2 also recomputes the GELU input during backward and never stores it, and that work is included in those numbers.</p>
+      <p>The cost is the ceiling. After ten minutes of training, x2 won 26 of 30 games against the level-9 CPU; r16 won 28. The report's last page says why the trade works at all. A standard matrix multiply of an m by k matrix with a k by n one costs about 2mnk FLOPs and at least 4(mk + kn + mn) bytes of traffic, and both are floors that no amount of kernel work removes. Halving all three dimensions cuts the arithmetic by 8 and the minimum traffic by 4. A model that is too small plateaus before it learns enough. One that is merely smaller learns faster and lands lower, and for a fixed target like beating the CPU, faster is what counts.</p>
+
+      <h2 id="what-carries-over">What carries over</h2>
+      <p>Five lessons, in the order they paid off. Use Tensor Cores and tile so that loaded operands are reused. Fuse so that intermediates stay in registers, attention included. Never allocate, zero, or free inside the training step. Design kernels around the workload: fused epilogues, loads overlapped with compute, and concurrent streams for work that does not depend on each other. And when the goal is a capable model in the least time, shrink the matrices.</p>
+      <p>The first four transfer to large Transformer training as they are, and at that scale the percentages are money: a ten percent reduction in training cost on a $100 million run is $10 million. The fifth depends on what you are measuring. Time to a target loss and time to a model that does the job are different races, and this report was run on the second one.</p>
+
+      <footer class="article-foot">
+        <a href="/#articles">&larr; All articles</a>
+        <a href="https://www.frisson-labs.com/decoder-only-transformer-optimization-101" target="_blank" rel="noopener">Read the report &rarr;</a>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <div class="colophon">
+        <span>&copy; 2026 Ali Janati</span>
+        <span><a href="/">alijanati.com</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/site.js?v=landscape-4" defer></script>
+  <script type="module" src="/sky.js?v=landscape-4"></script>
+  <script src="/navigation.js?v=landscape-4" defer></script>
+  <script type="module" src="/backgrounds.js?v=lake-scene-1"></script>
+</body>
+</html>

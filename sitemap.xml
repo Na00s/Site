@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://alijanati.com/</loc>
-    <lastmod>2026-08-15</lastmod>
+    <lastmod>2026-09-17</lastmod>
   </url>
   <url>
     <loc>https://alijanati.com/articles/qwen3-next-80b-a3b/</loc>
@@ -23,5 +23,9 @@
   <url>
     <loc>https://alijanati.com/articles/speculative-decoding/</loc>
     <lastmod>2026-08-15</lastmod>
+  </url>
+  <url>
+    <loc>https://alijanati.com/articles/transformer-optimization-101/</loc>
+    <lastmod>2026-09-17</lastmod>
   </url>
 </urlset>

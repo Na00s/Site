@@ -62,5 +62,17 @@
     "original": "https://images.unsplash.com/photo-1495250357898-6822052ef5b8",
     "description": "An aerial view of dark sand meeting the sea.",
     "license": "https://unsplash.com/license"
+  },
+  {
+    "id": "lake",
+    "title": "Mountain lake at dawn",
+    "credit": "Valentin",
+    "source": "https://unsplash.com/photos/misty-mountains-rise-above-a-calm-lake-at-dawn-C3XFOAc2Va8",
+    "image": "assets/lake.jpg",
+    "width": 2000,
+    "height": 1500,
+    "original": "https://images.unsplash.com/photo-1774112034535-f037b32b5884",
+    "description": "A mountain rising out of low cloud above a still lake at dawn.",
+    "license": "https://unsplash.com/license"
   }
 ]

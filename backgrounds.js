@@ -1,5 +1,5 @@
 // Each page has a fixed background: Mount Fuji for the homepage and its own scene for each article.
-const ids = ['fuji', 'forest', 'coast', 'hills', 'tides', 'original'];
+const ids = ['fuji', 'forest', 'coast', 'hills', 'tides', 'lake', 'original'];
 const host = document.querySelector('#sky-scene');
 const cover = host?.closest('.cover');
 let current = 'original';
@@ -21,7 +21,7 @@ async function apply(id) {
   try {
     let factory;
     if (id !== 'original') {
-      sceneModule ||= import('./landscapes/scene.js?v=original-feel-4');
+      sceneModule ||= import('./landscapes/scene.js?v=lake-scene-1');
       factory = (await sceneModule).createLandscapeHero;
     }
     if (revision !== request) return current;

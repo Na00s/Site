@@ -45,6 +45,17 @@ export const LANDSCAPE_SCENES = {
     mistColor: [.70,.79,.78], shadowStrength: 0,
     exposure: .12, softness: 1.6, grain: .030,
   },
+  lake: {
+    // Mountain over a still lake at dawn. The shoreline runs level at .67; the
+    // cloud band sits around the mountain's base between .48 and .63.
+    crop: [.51,.50], mobileCrop: [.51,.50], kind: 6,
+    water: [[0,.672],[1,.672],[1,1],[0,1]], water2: [],
+    waterTop: .66, waterBottom: 1, waterFeather: .02,
+    waterStrength: .0011, waterBrightness: .005,
+    mistCenter: [.50,.56], mistRadius: [.60,.075], mistStrength: .022,
+    mistColor: [.86,.84,.86], shadowStrength: 0,
+    exposure: .10, softness: 1.8, grain: .030,
+  },
 };
 
 const VERTEX = `
@@ -106,8 +117,12 @@ vec3 filmColor(vec3 source) {
     warmth = smoothstep(.55,.97,value)*.88;
   } else if (uKind > 3.5 && uKind < 4.5) {
     warmth = smoothstep(-.02,.16,source.r-source.b) * smoothstep(.20,.72,value)*.80;
-  } else if (uKind > 4.5) {
+  } else if (uKind > 4.5 && uKind < 5.5) {
     warmth = smoothstep(.58,.94,value)*.84;
+  } else if (uKind > 5.5) {
+    // The lake keeps its photographed dawn: pink cloud and lit peak stay warm,
+    // the blue sky and the water stay cool.
+    warmth = smoothstep(-.03,.17,source.r-source.b) * smoothstep(.26,.70,value)*.90;
   }
   vec3 color = mix(cool,warm,warmth);
   float transition = 4. * warmth * (1.-warmth);
@@ -155,12 +170,12 @@ void main() {
   float water = max(polygonMask(uv, false), polygonMask(uv, true));
   // Dark foreground branches and rocks remain steady inside a broad water mask.
   water *= smoothstep(.12, .30, luminance);
-  if (uKind > 4.5) {
+  if (uKind > 4.5 && uKind < 5.5) {
     // Water in the aerial photograph has a stronger blue/green component than sand.
     water *= smoothstep(-.04, .045, original.b - original.r);
   }
   float depth = clamp((uv.y - uWaterSettings.x) / max(.05, uWaterSettings.y - uWaterSettings.x), 0., 1.);
-  if (uKind > 4.5) depth = .75;
+  if (uKind > 4.5 && uKind < 5.5) depth = .75;
   float t = uTime;
   float waveA = sin(dot(uv,vec2(111.,182.)) - t * 1.05 + .35 * sin(uv.x * 37. + t * .31));
   float waveB = sin(dot(uv,vec2(-78.,281.)) + t * .76 + .4 * sin(uv.y * 48.));
