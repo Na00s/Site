@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Decoder-only Transformer optimization 101 · Ali Janati</title>
-  <meta name="description" content="A tour of the Frisson Labs report on training a decoder-only Transformer to play Melee on one RTX 6000 Pro: tiling, fusion, buffer reuse, CUDA-Oxide, and a smaller model, from 163,645 to 3,217,492 tokens per second.">
+  <meta name="description" content="A tour of a report I worked on, training a decoder-only Transformer to play Melee on one RTX 6000 Pro: tiling, fusion, buffer reuse, CUDA-Oxide, and a smaller model, from 163,645 to 3,217,492 tokens per second.">
   <link rel="canonical" href="https://alijanati.com/articles/transformer-optimization-101/">
   <meta name="author" content="Ali Janati">
   <meta name="theme-color" content="#f6f1e6" media="(prefers-color-scheme: light)">
@@ -66,7 +66,7 @@
       <div class="cover-words">
         <p class="crumbs" data-sky-shelter="date"><a href="/#articles">Articles</a> / Transformer optimization 101</p>
         <h1 id="cover-title" data-sky-shelter="title">Decoder-only Transformer optimization 101: 164K to 3.2M tokens/s on one GPU</h1>
-        <p class="meta">Sep 2026 &middot; Report: <a href="https://www.frisson-labs.com/decoder-only-transformer-optimization-101" target="_blank" rel="noopener">Decoder-Only Transformer Optimization 101</a>, Frisson Labs &middot; With TongKe Xue, Rohit Swamy, Eric Gu, Nikita Kuzmin, Charles Niu, and Tod Sophon</p>
+        <p class="meta">Sep 2026 &middot; Report: <a href="https://www.frisson-labs.com/decoder-only-transformer-optimization-101" target="_blank" rel="noopener">Decoder-Only Transformer Optimization 101</a> &middot; With TongKe Xue, Rohit Swamy, Eric Gu, Nikita Kuzmin, Charles Niu, and Tod Sophon</p>
         <nav class="cover-index" aria-label="Contents" data-sky-shelter="index" data-preview-ui>
           <a class="cover-index-row" href="#the-question-and-the-model"><span class="index-number">[1]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>The question and the model</span></a>
           <a class="cover-index-row" href="#m1-faster-matrix-multiplies"><span class="index-number">[2]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>m1: faster matrix multiplies</span></a>
@@ -85,7 +85,7 @@
     </header>
 
     <article class="article-body wrap" id="article-introduction">
-      <p><a href="https://www.frisson-labs.com/decoder-only-transformer-optimization-101" target="_blank" rel="noopener">Decoder-Only Transformer Optimization 101</a> is a report I worked on, published by Frisson Labs in September 2026. It measures how fast a single RTX 6000 Pro can train a decoder-only Transformer to play Super Smash Bros. Melee well enough to beat a level-9 CPU Fox. The naive implementation ran at 163,645 tokens per second. The final one runs at 3,217,492, and after ten minutes of training it still wins 26 games out of 30. This is a walk through the five steps in between and what each one bought.</p>
+      <p><a href="https://www.frisson-labs.com/decoder-only-transformer-optimization-101" target="_blank" rel="noopener">Decoder-Only Transformer Optimization 101</a> is a report I worked on, published in September 2026. It measures how fast a single RTX 6000 Pro can train a decoder-only Transformer to play Super Smash Bros. Melee well enough to beat a level-9 CPU Fox. The naive implementation ran at 163,645 tokens per second. The final one runs at 3,217,492, and after ten minutes of training it still wins 26 games out of 30. This is a walk through the five steps in between and what each one bought.</p>
 
       <h2 id="the-question-and-the-model">The question and the model</h2>
       <p>The model is Eric Gu's HAL-20M: a six-layer decoder-only Transformer with width 512, eight heads of 64, and a 2048-wide MLP, about 20 million parameters. It reads 256 frames of game state and predicts the controller autoregressively, c-stick first, then main stick, then buttons. It is a good subject because it is the language-model pretraining workload in miniature. Causal attention, matrix multiplies, MLPs, backpropagation, and optimizer updates are all there; the tokens happen to be Melee frames. A batch is 512 windows of 256 frames, so 131,072 tokens per step.</p>
