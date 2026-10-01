@@ -38,7 +38,7 @@
   <link rel="preload" href="./assets/sans.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="./assets/mono.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="./site.css?v=home-text-shadow-1">
-  <link rel="stylesheet" href="./content.css?v=fixed-page-scenes-1">
+  <link rel="stylesheet" href="./content.css?v=neurips-2026-1">
   <link rel="stylesheet" href="./figures.css?v=blue-peach-icons-1">
 
   <script type="application/ld+json">
@@ -55,6 +55,7 @@
       { "@type": "CollegeOrUniversity", "name": "Mines Paris" }
     ],
     "sameAs": [
+      "https://scholar.google.com/citations?user=3AEffWkAAAAJ",
       "https://github.com/Na00s",
       "https://huggingface.co/Na0s",
       "https://www.linkedin.com/in/alijanati/",
@@ -99,6 +100,7 @@
       <div class="cover-words">
         <h1 id="cover-title" data-sky-shelter="title">Ali Janati<span class="dot">.</span></h1>
         <p class="role" data-sky-shelter="date">Research in deep learning.</p>
+        <p class="cover-announcement"><a href="#router-sensitivity">New acceptance: <strong>NeurIPS 2026 · AXIOM Workshop</strong><span>Router sensitivity for expert pruning</span></a></p>
         <nav class="cover-index" aria-label="Contents" data-sky-shelter="index" data-preview-ui>
           <a class="cover-index-row" href="#recent"><span class="index-number">[1]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Recent</span></a>
           <a class="cover-index-row" href="#papers"><span class="index-number">[2]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Papers</span></a>
@@ -119,6 +121,7 @@
         <ul class="hero-links">
             <li><a href="mailto:aj3238@columbia.edu">Email</a></li>
             <li><a href="/cv/" target="_blank" rel="noopener">CV</a></li>
+            <li><a href="https://scholar.google.com/citations?user=3AEffWkAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar</a></li>
             <li><a href="https://github.com/Na00s" target="_blank" rel="noopener">GitHub</a></li>
             <li><a href="https://huggingface.co/Na0s" target="_blank" rel="noopener">Hugging&nbsp;Face</a></li>
             <li><a href="https://www.linkedin.com/in/alijanati/" target="_blank" rel="noopener">LinkedIn</a></li>
@@ -136,6 +139,10 @@
     <section class="news wrap" id="recent" aria-label="Recent news">
       <p class="tag">Recent</p>
       <ul>
+        <li>
+          <span class="when">Oct 2026</span>
+          <span class="what">Our <a href="https://arxiv.org/abs/2608.07890" target="_blank" rel="noopener">paper on router sensitivity for expert pruning</a> was accepted to the <a href="https://axiom-neurips2026.github.io/" target="_blank" rel="noopener"><strong>NeurIPS 2026 AXIOM Workshop</strong></a>. The revised paper is now available, with experiments on lightweight adaptation and the accuracy-compression tradeoff.</span>
+        </li>
         <li>
           <span class="when">Sep 2026</span>
           <span class="what">New <a href="/articles/transformer-optimization-101/">article</a> on a report I worked on: decoder-only Transformer optimization 101, from 163,645 to 3,217,492 tokens/s on one RTX 6000 Pro to teach a policy to play a game.</span>
@@ -172,7 +179,7 @@
           <p class="lede">Most of my work asks which parts of a large model are actually doing the work. Recent papers span expert pruning in mixture-of-experts models, training dynamics after grokking, uncertainty in multimodal recognition, and machine learning for epigenomics.</p>
 
           <ul class="pubs">
-            <li class="pub">
+            <li class="pub" id="router-sensitivity">
               <div class="pub-fig" aria-hidden="true">
                 <svg viewBox="0 0 92 92">
                   <path class="hot" d="M4 46h26M26 41l5 5-5 5"/>
@@ -189,13 +196,15 @@
               </div>
               <div>
                 <h3><a href="https://arxiv.org/abs/2608.07890" target="_blank" rel="noopener">Router Sensitivity Under Lightweight Fine-Tuning Identifies Prunable Experts in Mixture-of-Experts Models</a></h3>
-                <p class="authors"><span class="me">Ali Janati</span>, Kaoutar El Maghraoui, X. Luo, W. Shen, O. Zou, Y. Mao</p>
-                <p class="venue">arXiv &middot; Aug 2026</p>
-                <p class="gloss">Routers that barely move under light fine-tuning point to experts that can be pruned with minimal loss in quality.</p>
+                <p class="venue venue-featured"><a href="https://axiom-neurips2026.github.io/" target="_blank" rel="noopener">NeurIPS 2026 &middot; AXIOM Workshop</a><span>Accepted · Revised Sep 2026</span></p>
+                <p class="authors"><strong class="me">Ali Janati</strong>, Kaoutar El Maghraoui, Chengke Zou, Xinyi Luo, Wenyuan Shen</p>
+                <p class="gloss">Brief router-only fine-tuning reveals which experts to prune in mixture-of-experts models. We study how adapter placement shapes this signal and the resulting tradeoffs in accuracy, memory, and inference speed.</p>
                 <ul class="chips">
                   <li><a href="https://arxiv.org/abs/2608.07890" target="_blank" rel="noopener">arXiv</a></li>
                   <li><a href="https://arxiv.org/pdf/2608.07890" target="_blank" rel="noopener">PDF</a></li>
-                  <li><a href="https://huggingface.co/collections/Na0s/pruned-moes-mixtral-8x7b-instruct-v01-67019397bc00379a3b7657da" target="_blank" rel="noopener">Models</a></li>
+                  <li><a href="https://github.com/ianKa1/MoE_pruning" target="_blank" rel="noopener">Code</a></li>
+                  <li><a href="#moe-models">Models</a></li>
+                  <li><a href="/assets/docs/router-sensitivity.bib" download>BibTeX</a></li>
                 </ul>
               </div>
             </li>
@@ -462,13 +471,32 @@
               </div>
               <div class="project-copy">
                 <div class="head">
-                  <h3><a href="https://huggingface.co/collections/Na0s/pruned-moes-mixtral-8x7b-instruct-v01-67019397bc00379a3b7657da" target="_blank" rel="noopener">MoE pruning models</a></h3>
+                  <h3 id="moe-models"><a href="https://huggingface.co/collections/Na0s/pruned-moes-mixtral-8x7b-instruct-v01" target="_blank" rel="noopener">MoE pruning models</a></h3>
                   <ul class="chips">
-                    <li><a href="https://huggingface.co/collections/Na0s/pruned-moes-mixtral-8x7b-instruct-v01-67019397bc00379a3b7657da" target="_blank" rel="noopener">Collection</a></li>
+                    <li><a href="https://huggingface.co/collections/Na0s/pruned-moes-mixtral-8x7b-instruct-v01" target="_blank" rel="noopener">Collection</a></li>
+                    <li><a href="https://github.com/ianKa1/MoE_pruning" target="_blank" rel="noopener">Code</a></li>
                     <li><a href="https://huggingface.co/Na0s" target="_blank" rel="noopener">All&nbsp;models</a></li>
                   </ul>
                 </div>
-                <p class="desc">Open artifacts behind the router-sensitivity paper: Mixtral-8x7B and Qwen1.5-MoE variants with experts pruned and ablated, along with the SFT datasets used to recover performance. The Mixtral series is curated as a collection; the full set lives on the profile.</p>
+                <p class="desc">Released Mixtral checkpoints from our expert-pruning experiments, including router adaptation, all-module adaptation, and three pruning families. The collection contains 14 checkpoints plus the original Mixtral model. See the configurations below and the <a href="https://arxiv.org/abs/2608.07890" target="_blank" rel="noopener">router-sensitivity paper</a> for the experimental results.</p>
+                <details class="model-resources">
+                  <summary>Checkpoint configurations</summary>
+                  <p>Browse 14 checkpoints grouped by adaptation and pruning setup. Each link gives the number of experts retained per layer; all checkpoints route each token to two experts.</p>
+                  <div class="table-scroll" tabindex="0" role="region" aria-label="Released Mixtral checkpoint configurations">
+                  <table>
+                    <thead><tr><th scope="col">Family</th><th scope="col">Released configuration</th><th scope="col">Checkpoints</th></tr></thead>
+                    <tbody>
+                    <tr><th scope="row">Gate-only LoRA</th><td>Rank 4; 5,000 training steps</td><td><a href="https://huggingface.co/Na0s/Mixtral-8x7B-Instruct-v0.1-LoRA-on-Gates" target="_blank" rel="noopener">8 experts</a></td></tr>
+                    <tr><th scope="row">All-module LoRA</th><td>Rank 4; 10,000 training steps</td><td><a href="https://huggingface.co/Na0s/Mixtral-8x7B-Instruct-v0.1-exhaustive-LoRA" target="_blank" rel="noopener">8 experts</a></td></tr>
+                    <tr><th scope="row">Random pruning</th><td>1 to 4 experts removed per layer</td><td><a href="https://huggingface.co/Na0s/Mixtral-8x7B-v0.1-instruct-pruned-random-1-experts" target="_blank" rel="noopener">7 experts</a> &middot; <a href="https://huggingface.co/Na0s/Mixtral-8x7B-v0.1-instruct-pruned-random-2-experts" target="_blank" rel="noopener">6 experts</a> &middot; <a href="https://huggingface.co/Na0s/Mixtral-8x7B-v0.1-instruct-pruned-random-3-experts" target="_blank" rel="noopener">5 experts</a> &middot; <a href="https://huggingface.co/Na0s/Mixtral-8x7B-v0.1-instruct-pruned-random-4-experts" target="_blank" rel="noopener">4 experts</a></td></tr>
+                    <tr><th scope="row">L2 pruning after gate LoRA</th><td>Repository label: L2 norm after gate adaptation</td><td><a href="https://huggingface.co/Na0s/Mixtral-8x7B-v0.1-instruct-l2-norm-post-Gates-LoRA-SFT-pruned-1-expert" target="_blank" rel="noopener">7 experts</a> &middot; <a href="https://huggingface.co/Na0s/Mixtral-8x7B-v0.1-instruct-l2-norm-post-Gates-LoRA-SFT-pruned-2-experts" target="_blank" rel="noopener">6 experts</a> &middot; <a href="https://huggingface.co/Na0s/Mixtral-8x7B-v0.1-instruct-l2-norm-post-Gates-LoRA-SFT-pruned-3-experts" target="_blank" rel="noopener">5 experts</a> &middot; <a href="https://huggingface.co/Na0s/Mixtral-8x7B-v0.1-instruct-l2-norm-post-Gates-LoRA-SFT-pruned-4-experts" target="_blank" rel="noopener">4 experts</a></td></tr>
+                    <tr><th scope="row">Pruning after all-module LoRA</th><td>Repository label: exhaustive LoRA + pruning</td><td><a href="https://huggingface.co/Na0s/Mixtral-8x7B-Instruct-v0.1-exhaustive-LoRA-SFT-pruned-1-expert" target="_blank" rel="noopener">7 experts</a> &middot; <a href="https://huggingface.co/Na0s/Mixtral-8x7B-Instruct-v0.1-exhaustive-LoRA-SFT-pruned-2-experts" target="_blank" rel="noopener">6 experts</a> &middot; <a href="https://huggingface.co/Na0s/Mixtral-8x7B-Instruct-v0.1-exhaustive-LoRA-SFT-pruned-3-experts" target="_blank" rel="noopener">5 experts</a> &middot; <a href="https://huggingface.co/Na0s/Mixtral-8x7B-Instruct-v0.1-exhaustive-LoRA-SFT-pruned-4-experts" target="_blank" rel="noopener">4 experts</a></td></tr>
+                    </tbody>
+                  </table>
+                  </div>
+                  <p class="resource-note">Configurations follow the public model cards and repository labels. The paper's main router-only experiment uses rank 8 and 500 steps. A mapping from these releases to individual paper results remains to be documented.</p>
+                </details>
+
               </div>
             </li>
             <li class="project">
@@ -525,6 +553,7 @@
         <ul class="foot-links">
           <li><a href="mailto:aj3238@columbia.edu">Email</a></li>
           <li><a href="/cv/" target="_blank" rel="noopener">CV</a></li>
+          <li><a href="https://scholar.google.com/citations?user=3AEffWkAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar</a></li>
           <li><a href="https://github.com/Na00s" target="_blank" rel="noopener">GitHub</a></li>
           <li><a href="https://huggingface.co/Na0s" target="_blank" rel="noopener">Hugging&nbsp;Face</a></li>
           <li><a href="https://www.linkedin.com/in/alijanati/" target="_blank" rel="noopener">LinkedIn</a></li>
