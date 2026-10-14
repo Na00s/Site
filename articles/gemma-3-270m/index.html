@@ -85,7 +85,7 @@
     <article class="article-body wrap" id="article-introduction">
       <p>Gemma 3's 270M variant is the most instructive model in its family precisely because it is small: 18 layers, embedding dimension 640, and a design where almost every recent architecture idea appears once. Sliding-window attention five layers out of six, two RoPE frequency bases, QK-norm, normalization on both sides of every sublayer, and a GELU-gated feed-forward. My reimplementation is 252 lines of plain PyTorch, and this article walks the parts that differ from a vanilla decoder.</p>
 
-      <p>Two config choices are worth noticing before any code. The vocabulary is enormous for the model size, 262,144 entries at dimension 640, so most of the parameters live in the embedding table; the file ends by printing the total parameter count with and without tying the output head to the embedding, which is the difference the release cares about at this scale. And the heads are wide: 4 query heads of dimension 256 each with a single KV head, so attention operates in a space wider than the residual stream itself.</p>
+      <p>Two config choices shape the model. The vocabulary is enormous for the model size, 262,144 entries at dimension 640, so most of the parameters live in the embedding table; the file ends by printing the total parameter count with and without tying the output head to the embedding, which is the difference the release cares about at this scale. And the heads are wide: 4 query heads of dimension 256 each with a single KV head, so attention operates in a space wider than the residual stream itself.</p>
 
       <h2 id="one-attention-module-two-personalities">One attention module, two personalities</h2>
       <p>Every sixth layer is a full-attention layer with RoPE base 1,000,000; the five layers between are sliding-window layers, window 512, with RoPE base 10,000. Which personality a layer gets is decided by the config's <code>layer_type</code> tuple, and inside the module it comes down to picking a theta and a mask.</p>
@@ -104,10 +104,10 @@ q = self.apply_rope(q, cos, sin)
 k = self.apply_rope(k, cos, sin)</code></pre>
         <figcaption class="code-cap" id="code-caption-1"><a href="https://github.com/Na00s/PyTorch-Playground/blob/main/gemma_270M/model.py" target="_blank" rel="noopener">gemma_270M/model.py</a></figcaption>
       </figure>
-      <p>The dual base is the interesting design decision: local layers get high-frequency rotations tuned for near context, and the sparse full layers get the long-wavelength base that makes 32k positions distinguishable. Masks are built per forward pass at sequence length T rather than registered as full-context buffers; at a 32,768-token context, a cached full mask is real memory, and the comment in the code says exactly why it is not kept.</p>
+      <p>The dual base is the interesting design decision: local layers get high-frequency rotations tuned for near context, and the sparse full layers get the long-wavelength base that makes 32k positions distinguishable. Each forward pass builds its mask at sequence length T. This sizes the mask to the current sequence and avoids retaining a full 32,768-token mask.</p>
 
       <h2 id="attention-accumulates-in-fp32">Attention accumulates in fp32</h2>
-      <p>The model runs in bf16, but scores and softmax happen in float32 before casting back. At head dimension 256 the dot products are long sums, and bf16's 8 bits of mantissa lose real precision there; accumulating in fp32 is the standard fix, made explicit here rather than hidden inside a fused kernel. QK-norm, an RMSNorm over the head dimension, runs on queries and keys before RoPE.</p>
+      <p>The model runs in bf16, but scores and softmax happen in float32 before casting back. At head dimension 256 the dot products are long sums, and bf16's 8 bits of mantissa lose real precision there; the implementation explicitly accumulates attention scores in fp32. QK-norm, an RMSNorm over the head dimension, runs on queries and keys before RoPE.</p>
       <figure class="code-figure">
         <pre tabindex="0" aria-labelledby="code-caption-2"><code>attn_scores = q.float() @ k.transpose(-1, -2).float()
 attn_scores = attn_scores / math.sqrt(self.config.head_dim)

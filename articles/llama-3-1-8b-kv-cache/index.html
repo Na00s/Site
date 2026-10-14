@@ -86,7 +86,7 @@
       <p>Llama 3.1 8B is the closest thing the field has to a reference decoder: 32 layers, hidden size 4096, grouped-query attention with 32 query heads over 8 KV heads, SwiGLU, RMSNorm, RoPE at theta 500,000, vocabulary 128,256. That makes it the right model to attach the one piece of inference machinery everyone uses and few people write by hand: the KV cache. Mine is the only model in the repository that carries one, and it is about twenty lines.</p>
 
       <h2 id="grouped-queries-without-repeat-kv">Grouped queries without repeat_kv</h2>
-      <p>The usual implementation repeats each KV head four times to match the 32 query heads. I skip the copy: reshape queries to five dimensions, grouped by KV head, leave keys and values with a singleton group axis, and let broadcasting do the rest. No <code>repeat_interleave</code>, no materialized copies of K and V, and the grouping is visible in the shapes.</p>
+      <p>The usual implementation repeats each KV head four times to match the 32 query heads. I skip the copy: reshape queries to five dimensions, grouped by KV head, leave keys and values with a singleton group axis, and let broadcasting do the rest. Broadcasting reuses K and V, and the grouping is visible in the shapes.</p>
       <figure class="code-figure">
         <pre tabindex="0" aria-labelledby="code-caption-1"><code>repeat_factor = num_attention_heads // num_key_value_heads    # 32 // 8 = 4
 q = q.reshape(B, num_key_value_heads, repeat_factor, T, head_size)
@@ -97,7 +97,7 @@ scores = q @ k.transpose(-1, -2)    # B, n_kv, 4, T, T via broadcasting</code></
       </figure>
 
       <h2 id="rope-has-to-know-where-it-is">RoPE has to know where it is</h2>
-      <p>A cache changes positional encoding in one subtle way: when the model processes token 4097 alone, its rotary angle must correspond to position 4097, not position 0. So the frequency table takes the past length as an offset, and everything else stays vanilla RoPE.</p>
+      <p>A cache changes positional encoding in one subtle way: when the model processes token 4097 alone, its rotary angle must correspond to position 4097. So the frequency table takes the past length as an offset, and everything else stays vanilla RoPE.</p>
       <figure class="code-figure">
         <pre tabindex="0" aria-labelledby="code-caption-2"><code>@staticmethod
 def get_rope_params(theta, length, head_dim, past_len=0):

@@ -13,11 +13,9 @@
   <meta property="og:url" content="https://alijanati.com/articles/faynt/">
   <meta property="og:title" content="Faynt: learning competitive Melee with one policy for 26 characters">
   <meta property="og:description" content="How 10M- and 75M-parameter policies learn competitive Melee through imitation, distillation, and reinforcement learning, with one checkpoint for all 26 characters.">
-  <meta property="og:image" content="https://alijanati.com/assets/images/og-fuji-v1.jpg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <meta property="og:image" content="https://alijanati.com/landscapes/assets/hills.jpg">
   <meta property="og:image:type" content="image/jpeg">
-  <meta property="og:image:alt" content="Ali Janati. Research in deep learning, against a Mount Fuji landscape.">
+  <meta property="og:image:alt" content="Coastal hills overlooking the Pacific. Faynt: learning competitive Melee.">
   <link rel="icon" href="/favicon.ico?v=fuji-icon-1" sizes="16x16 32x32 48x48">
   <link rel="icon" href="/assets/images/favicon.svg?v=fuji-icon-1" type="image/svg+xml" sizes="any">
   <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png?v=fuji-icon-1" sizes="180x180">
@@ -36,8 +34,11 @@
   <link rel="stylesheet" href="/site.css?v=navy-dark-2">
   <link rel="stylesheet" href="/article.css?v=article-scenes-1">
   <link rel="stylesheet" href="/navigation.css?v=landscape-4">
+  <link rel="preload" as="image" href="/landscapes/assets/hills.jpg">
+  <link rel="stylesheet" href="/articles/faynt/faynt.css?v=visual-1">
+  <noscript><style>.faynt-controls,.faynt-range-control{display:none!important}</style></noscript>
 </head>
-<body class="article-page" data-article-background="hills">
+<body class="article-page faynt-page" data-article-background="hills">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-head" id="top">
@@ -55,85 +56,118 @@
     </div>
   </header>
 
-  <nav class="side-toc" aria-label="Contents" data-preview-ui inert>
-      <a href="#training-and-architecture" aria-label="Training and architecture"><span>Training and architecture</span></a>
-      <a href="#curriculum-and-distillation" aria-label="Curriculum and distillation"><span>Curriculum and distillation</span></a>
-      <a href="#learning-through-play" aria-label="Learning through play"><span>Learning through play</span></a>
-      <a href="#reading-the-gameplay-results" aria-label="Reading the gameplay results"><span>Reading the gameplay results</span></a>
-      <a href="#one-decision-per-frame" aria-label="One decision per frame"><span>One decision per frame</span></a>
-      <a href="#paper-and-releases" aria-label="Paper and releases"><span>Paper and releases</span></a>
+  <nav class="side-toc" aria-label="Contents" inert>
+    <a href="#architecture"><span>One policy, 26 characters</span></a>
+    <a href="#training"><span>The training recipe</span></a>
+    <a href="#gameplay"><span>From loss to gameplay</span></a>
+    <a href="#reinforcement-learning"><span>Learning through play</span></a>
+    <a href="#inference"><span>Inside one frame</span></a>
+    <a href="#releases"><span>Paper and releases</span></a>
   </nav>
 
-  <main id="main" class="article-main">
-    <header class="article-head cover" aria-labelledby="cover-title" data-sky-mode="day">
+  <main id="main" class="faynt-main">
+    <header class="faynt-hero cover" aria-labelledby="faynt-title">
       <div id="sky-scene" aria-hidden="true"></div>
-      <div class="cover-words">
-        <p class="crumbs" data-sky-shelter="date"><a href="/#articles">Articles</a> / Faynt</p>
-        <h1 id="cover-title" data-sky-shelter="title">Faynt: learning competitive Melee with one policy for 26 characters</h1>
-        <p class="meta">Oct 2026 &middot; Research article: <a href="https://www.frisson-labs.com/faynt" target="_blank" rel="noopener">Faynt at Frisson Labs</a> &middot; By Ali Janati and Nikita Kuzmin, with advisory contributions from Rohit Swamy and Charles Niu</p>
-        <nav class="cover-index" aria-label="Contents" data-sky-shelter="index" data-preview-ui>
-          <a class="cover-index-row" href="#training-and-architecture"><span class="index-number">[1]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Training and architecture</span></a>
-          <a class="cover-index-row" href="#curriculum-and-distillation"><span class="index-number">[2]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Curriculum and distillation</span></a>
-          <a class="cover-index-row" href="#learning-through-play"><span class="index-number">[3]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Learning through play</span></a>
-          <a class="cover-index-row" href="#reading-the-gameplay-results"><span class="index-number">[4]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Reading the gameplay results</span></a>
-          <a class="cover-index-row" href="#one-decision-per-frame"><span class="index-number">[5]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>One decision per frame</span></a>
-          <a class="cover-index-row" href="#paper-and-releases"><span class="index-number">[6]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Paper and releases</span></a>
-        </nav>
+      <div class="faynt-hero-inner">
+        <p class="faynt-eyebrow"><a href="/#articles">Articles</a><span>October 2026</span></p>
+        <h1 id="faynt-title">Faynt</h1>
+        <p class="faynt-hero-subtitle">Learning competitive Melee.</p>
+        <p class="faynt-hero-description">Human replays. A shared policy. Learning through play.</p>
+        <a class="faynt-hero-link" href="https://www.frisson-labs.com/faynt" target="_blank" rel="noopener">Explore the research at Frisson Labs <span aria-hidden="true">↗</span></a>
+        <div class="faynt-hero-credits">
+          <p>Ali Janati &amp; Nikita Kuzmin</p>
+          <p>Advisory contributions: Rohit Swamy &amp; Charles Niu</p>
+        </div>
       </div>
-      <div class="sky-modes" role="group" aria-label="Sky appearance" data-preview-ui>
-        <button type="button" data-sky-mode="day" aria-label="Day" aria-pressed="true"></button>
-        <button type="button" data-sky-mode="night" aria-label="Night" aria-pressed="false"></button>
-        <button type="button" data-sky-mode="dawn" aria-label="Dawn" aria-pressed="false"></button>
-      </div>
+      <a class="faynt-explore" href="#architecture">Explore the study <span aria-hidden="true">↓</span></a>
+      <span class="faynt-hero-caption">26 characters. One checkpoint.</span>
     </header>
 
-    <article class="article-body wrap" id="article-introduction">
-      <p><a href="https://www.frisson-labs.com/faynt" target="_blank" rel="noopener">Faynt</a> is our study of learning competitive Super Smash Bros. Melee from human replays and gameplay. We train two Transformer policies, with 10M and 75M parameters, each controlling all 26 characters through one checkpoint. The work follows the full path from predicting a human controller input to choosing actions that win games, then making those decisions within a single frame.</p>
-      <p>The <a href="https://arxiv.org/abs/2610.02144" target="_blank" rel="noopener">paper</a>, by Ali Janati, Nikita Kuzmin, Rohit Swamy, and Charles Niu, brings together the architecture, training experiments, gameplay evaluations, and inference measurements. This walkthrough follows the main decisions along that path.</p>
+    <article class="faynt-article">
+      <div class="faynt-intro faynt-prose">
+        <p>We trained Faynt to play all 26 characters in competitive Melee.</p>
+        <p>The training recipe starts with human replays. We train two Transformer policies, refine their imitation of strong players, and continue learning through gameplay. Each model controls the whole roster with one checkpoint.</p>
+      </div>
+      <div class="faynt-metrics" aria-label="Faynt at a glance">
+        <div><strong>10M<span> / </span>75M</strong><span>Two policy sizes</span></div>
+        <div><strong>840<span>k</span></strong><span>Human replays</span></div>
+        <div><strong>26</strong><span>Characters per checkpoint</span></div>
+      </div>
 
-      <h2 id="training-and-architecture">Training and architecture</h2>
-      <p>A policy reads structured game state: the fighters, their positions and actions, the stage, and recent controller inputs. It predicts the next controller command. Training windows span 256 frames, about 4.3 seconds at Melee's 60 Hz. That history gives the model information about how a situation developed before it chooses the next input.</p>
-      <p>The dataset contains 839,942 accepted human replays and approximately 17.48 billion training targets. We split by complete game, keeping both players' perspectives together, so validation measures prediction on separate games. Pretraining uses behavioral cloning: increase the probability of the command the human player actually chose.</p>
-      <table>
-        <caption>Two model sizes, with a shared 256-frame context</caption>
-        <thead>
-          <tr><th scope="col">Configuration</th><th scope="col">10M</th><th scope="col">75M</th></tr>
-        </thead>
-        <tbody>
-          <tr><th scope="row">Transformer blocks</th><td>5</td><td>11</td></tr>
-          <tr><th scope="row">Hidden width</th><td>384</td><td>768</td></tr>
-          <tr><th scope="row">Query / key-value heads</th><td>6 / 2</td><td>12 / 3</td></tr>
-          <tr><th scope="row">Feed-forward width</th><td>768</td><td>1,920</td></tr>
-        </tbody>
-      </table>
-      <p>The backbone uses grouped-query attention and Full Attention Residuals, which learn how to combine earlier representations. Model-size and optimizer sweeps, together with measured throughput, guide the pretraining budgets. We use Muon for hidden backbone matrices and AdamW for the remaining parameters. The paper evaluates the resulting recipe; individual architecture components would need further controlled experiments to establish their contribution to playing strength.</p>
+      <section class="faynt-section" id="architecture" aria-labelledby="architecture-title">
+        <div class="faynt-prose">
+          <p class="faynt-section-number">01 / Architecture</p>
+          <h2 id="architecture-title">One policy, 26 characters.</h2>
+          <p>Both models read structured game state and recent controller inputs, then predict the next command. A 256-frame context captures about 4.3 seconds of play. Grouped-query attention keeps the attention cache compact; Full Attention Residuals let each sublayer learn how to combine earlier representations.</p>
+          <p>We study model size, optimization, and training exposure together. Scaling fits and measured throughput guide the pretraining budgets. Muon updates hidden backbone matrices; AdamW handles the remaining parameters.</p>
+        </div>
+        <div class="faynt-architecture-grid">
+          <div class="faynt-model-card"><span>Compact policy</span><h3>10M</h3><p>5 blocks <span aria-hidden="true">·</span> width 384</p><div><span>Query / KV heads</span><strong>6 / 2</strong></div></div>
+          <div class="faynt-model-card"><span>Larger policy</span><h3>75M</h3><p>11 blocks <span aria-hidden="true">·</span> width 768</p><div><span>Query / KV heads</span><strong>12 / 3</strong></div></div>
+        </div>
+      </section>
 
-      <h2 id="curriculum-and-distillation">Curriculum and distillation</h2>
-      <p>The replay collection includes players of different skill levels and both sides of each match. Supervised post-training changes which demonstrations the policies see. The curriculum moves from the natural replay distribution toward winning play, then toward winners in the Master and Diamond ranks.</p>
-      <p>This also changes how we select checkpoints. We track a weighted prediction loss: 90% Master-winning loss plus 10% Diamond-winning loss. Later training uses approximately the same proportions of replay visits. Overall validation loss remains useful for tracking the broader distribution, while the weighted score follows the behavior emphasized by this stage.</p>
-      <p>The 10M policy then learns from the 75M teacher. Distillation gives equal weight to predicting the recorded human action and matching the teacher's probability distribution over commands. That distribution supplies information about plausible alternatives at each frame. Two rounds, with a lower learning rate in the second, reduce the 10M weighted loss from 0.76443 to 0.75746.</p>
-      <p>Gameplay provides a separate check. Across the same 152-game schedule, supervised post-training raises 10M wins from 49 to 106 and 75M wins from 69 to 123. The supervised 10M outperforms the pretrained 75M despite its higher overall prediction loss. The weighted score agrees with the win-rate ordering of these four checkpoints, a useful observation whose scope is this evaluated set.</p>
+      <section class="faynt-section" id="training" aria-labelledby="training-title">
+        <div class="faynt-prose">
+          <p class="faynt-section-number">02 / Training</p>
+          <h2 id="training-title">From human play to a stronger policy.</h2>
+          <p>Pretraining learns from approximately 840,000 replays, with complete games assigned to separate training, validation, and test splits. Post-training progressively emphasizes winning demonstrations from stronger players. The smaller policy then learns from the larger model's action probabilities.</p>
+        </div>
+        <div class="faynt-card faynt-recipe">
+          <div class="faynt-controls faynt-stage-controls" role="group" aria-label="Explore training stages">
+            <button type="button" data-faynt-stage="0" aria-pressed="true"><span>01</span>Pretraining</button>
+            <button type="button" data-faynt-stage="1" aria-pressed="false"><span>02</span>Curriculum</button>
+            <button type="button" data-faynt-stage="2" aria-pressed="false"><span>03</span>Distillation</button>
+            <button type="button" data-faynt-stage="3" aria-pressed="false"><span>04</span>Reinforcement learning</button>
+          </div>
+          <div id="faynt-stage-panel" class="faynt-stage-panel" aria-live="polite"><p class="faynt-stage-kicker">Learn human play</p><h3>Predict the next controller input.</h3><p>Behavioral cloning turns 17.48 billion training targets into a policy. Each target asks the model to predict the command chosen by a human player.</p></div>
+        </div>
+        <div class="faynt-prose">
+          <p>Checkpoint selection follows a weighted loss: 90% Master-winning prediction loss and 10% Diamond-winning loss. The same winner mixture continues through distillation, where the 10M combines human-action prediction with the 75M teacher's distribution. Two rounds bring its weighted loss from 0.76443 to 0.75746.</p>
+        </div>
+        <figure class="faynt-card">
+          <div class="faynt-card-head"><div><p class="faynt-figure-number">Figure 01</p><h3>Learning curves</h3></div><div class="faynt-controls" role="group" aria-label="Policy size for learning curves"><button type="button" data-faynt-loss-model="10M" aria-pressed="true">10M</button><button type="button" data-faynt-loss-model="75M" aria-pressed="false">75M</button></div></div>
+          <div class="faynt-legend"><span class="faynt-key-weighted">Weighted loss</span><span class="faynt-key-overall">Overall loss</span></div>
+          <div id="faynt-loss-chart" class="faynt-chart" aria-label="Validation loss during post-training"><table class="faynt-fallback-table"><caption>10M weighted validation loss</caption><thead><tr><th scope="col">Checkpoint</th><th scope="col">Loss</th></tr></thead><tbody><tr><th scope="row">Pretrained</th><td>0.81152</td></tr><tr><th scope="row">Winner mixture</th><td>0.76443</td></tr><tr><th scope="row">Final distillation</th><td>0.75746</td></tr></tbody></table></div>
+          <div class="faynt-range-control"><label for="faynt-loss-progress">Explore training progress</label><input id="faynt-loss-progress" type="range" min="0" max="1000" value="1000"></div>
+          <div id="faynt-loss-readout" class="faynt-loss-readout" aria-live="polite">Final 10M weighted loss: <strong>0.75746</strong></div>
+          <figcaption class="faynt-chart-note">Held-out replay prediction. Lower is better. Weighted loss follows Master and Diamond winners; the horizontal axis follows processed targets along the selected checkpoint's training history.</figcaption>
+        </figure>
+      </section>
 
-      <h2 id="learning-through-play">Learning through play</h2>
-      <p>Reinforcement learning continues from the supervised checkpoints using proximal policy optimization, or PPO. Both policies train in Fox mirror matches across six stages. Rewards include taking stocks and dealing damage, alongside movement, offstage, and ledge terms. Penalties on changes in action probabilities help keep updates controlled and preserve a connection to the supervised policy.</p>
-      <p>The 10M receives a second run using full self-play, with a longer reward horizon and several changes to the objective. Extending the reward half-life from four to eight seconds gives later consequences more weight. These settings change together, and the two model sizes have different training histories, so their final scores reflect the complete training paths.</p>
+      <section class="faynt-section" id="gameplay" aria-labelledby="gameplay-title">
+        <div class="faynt-prose"><p class="faynt-section-number">03 / Gameplay</p><h2 id="gameplay-title">Better demonstrations change the game.</h2><p>In the same 152-game suite, supervised post-training raises the 10M from 49 wins to 106, and the 75M from 69 to 123. Both policies take less damage and build larger early leads. The supervised 10M wins more often than the pretrained 75M, even with higher overall prediction loss.</p></div>
+        <figure class="faynt-card">
+          <div class="faynt-card-head"><div><p class="faynt-figure-number">Figure 02</p><h3>From loss to playing strength</h3></div></div>
+          <div class="faynt-controls" role="group" aria-label="Gameplay comparison metric"><button type="button" data-faynt-gameplay-metric="win" aria-pressed="true">Win rate</button><button type="button" data-faynt-gameplay-metric="overall" aria-pressed="false">Overall loss</button><button type="button" data-faynt-gameplay-metric="weighted" aria-pressed="false">Weighted loss</button></div>
+          <div id="faynt-gameplay-chart" class="faynt-chart" aria-label="Pretrained and supervised policies compared"><div class="faynt-bar-row"><span class="faynt-bar-label">10M pretrained</span><div class="faynt-bar-track"><div class="faynt-bar-fill is-secondary" style="width:32.2%"></div></div><strong class="faynt-bar-value">32.2%</strong></div><div class="faynt-bar-row"><span class="faynt-bar-label">10M supervised</span><div class="faynt-bar-track"><div class="faynt-bar-fill" style="width:69.7%"></div></div><strong class="faynt-bar-value">69.7%</strong></div><div class="faynt-bar-row"><span class="faynt-bar-label">75M pretrained</span><div class="faynt-bar-track"><div class="faynt-bar-fill is-secondary" style="width:45.4%"></div></div><strong class="faynt-bar-value">45.4%</strong></div><div class="faynt-bar-row"><span class="faynt-bar-label">75M supervised</span><div class="faynt-bar-track"><div class="faynt-bar-fill" style="width:80.9%"></div></div><strong class="faynt-bar-value">80.9%</strong></div></div>
+          <figcaption class="faynt-chart-note">Four checkpoints on an identical 152-game schedule: Final Destination, four stocks, eight-minute timer. Weighted winning-play loss orders these checkpoints consistently with win rate.</figcaption>
+        </figure>
+      </section>
 
-      <h2 id="reading-the-gameplay-results">Reading the gameplay results</h2>
-      <p>The final 10M wins 240 of 244 same-character games against fourteen Slippi-AI releases on their supported characters. Those opponents retain 21- or 24-frame action delays, while Faynt uses zero added delay. The evaluation leaves the contribution of that timing difference unresolved.</p>
-      <p>A separate comparison uses one privately supplied Slippi-AI checkpoint with zero added delay, under Master Player and Cody conditioning. The final 10M wins all 68 games; the 75M wins 58. These results describe that opponent and schedule. Only Fox receives reinforcement-learning experience, while all 26 characters share the updated weights and appear in the expanded evaluation.</p>
+      <section class="faynt-section" id="reinforcement-learning" aria-labelledby="rl-title">
+        <div class="faynt-prose"><p class="faynt-section-number">04 / Reinforcement learning</p><h2 id="rl-title">Learn from the next exchange.</h2><p>Both models continue with PPO, playing Fox against Fox across six stages. Taking stocks and dealing damage earn rewards. Penalties on changes in action probabilities keep learning connected to the supervised starting policy.</p><p>The 10M's second run uses full self-play and extends the reward half-life from four to eight seconds, giving later consequences more weight. Fox supplies the reinforcement-learning experience; the updated weights remain shared across the roster.</p></div>
+        <figure class="faynt-results-card">
+          <div class="faynt-result"><span>Supported-character mirrors</span><strong>240<span> / 244</span></strong><p>10M wins against fourteen releases</p></div>
+          <div class="faynt-result"><span>Separate zero-delay comparison</span><strong>68<span> / 68</span></strong><p>10M wins under two conditioning settings</p></div>
+          <figcaption class="faynt-chart-note">The 244-game panel preserves opponents' 21- or 24-frame delays. The 68-game panel uses one privately supplied zero-delay Slippi-AI checkpoint. Faynt has zero added delay in both.</figcaption>
+        </figure>
+      </section>
 
-      <h2 id="one-decision-per-frame">One decision per frame</h2>
-      <p>Melee allows about 16.67 milliseconds per frame. The standard PyTorch path spends substantial time launching small operations and reading cache bookkeeping back to the host. Keeping that bookkeeping on the GPU and replaying most of the policy step through a CUDA graph cuts this overhead.</p>
-      <p>On recorded game inputs, optimized T4 inference averages 5.2 ms for 10M and 8.7 ms for 75M, with 99th-percentile latencies of 6.8 and 12.1 ms. The timings use random weights and include feature conversion, sampling, and command decoding; emulator execution and communication are excluded. Late decisions still occur, including 0.6% for T4/75M. A separate check with trained checkpoints reproduces the same sampled actions across 1,200 frames.</p>
+      <section class="faynt-section" id="inference" aria-labelledby="inference-title">
+        <div class="faynt-prose"><p class="faynt-section-number">05 / Real-time inference</p><h2 id="inference-title">Inside a 16.67 ms frame.</h2><p>A decision has to arrive while it can still affect the game. Keeping cache bookkeeping on the GPU removes repeated host synchronization. CUDA graph replay cuts the overhead of launching many small operations. On a T4, the optimized 10M averages 5.2 ms per decision and the 75M averages 8.7 ms.</p></div>
+        <figure class="faynt-card">
+          <div class="faynt-card-head"><div><p class="faynt-figure-number">Figure 03</p><h3>Time to make a move</h3></div><div class="faynt-controls" role="group" aria-label="GPU for inference results"><button type="button" data-faynt-gpu="NVIDIA T4" aria-pressed="true">T4</button><button type="button" data-faynt-gpu="NVIDIA L4" aria-pressed="false">L4</button><button type="button" data-faynt-gpu="NVIDIA A10G" aria-pressed="false">A10G</button></div></div>
+          <div id="faynt-latency-chart" class="faynt-chart" aria-label="Recorded-game inference latency"><div class="faynt-bar-row"><span class="faynt-bar-label">10M mean</span><div class="faynt-bar-track"><div class="faynt-bar-fill" style="width:31.2%"></div></div><strong class="faynt-bar-value">5.2 ms</strong></div><div class="faynt-bar-row"><span class="faynt-bar-label">10M p99</span><div class="faynt-bar-track"><div class="faynt-bar-fill is-secondary" style="width:40.8%"></div></div><strong class="faynt-bar-value">6.8 ms</strong></div><div class="faynt-bar-row"><span class="faynt-bar-label">75M mean</span><div class="faynt-bar-track"><div class="faynt-bar-fill" style="width:52.2%"></div></div><strong class="faynt-bar-value">8.7 ms</strong></div><div class="faynt-bar-row"><span class="faynt-bar-label">75M p99</span><div class="faynt-bar-track"><div class="faynt-bar-fill is-secondary" style="width:72.6%"></div></div><strong class="faynt-bar-value">12.1 ms</strong></div></div>
+          <figcaption class="faynt-chart-note">Recorded-game inputs at 60 Hz; timing uses random weights and includes feature conversion, inference, sampling, and decoding. Emulator and communication time are excluded. T4/75M misses 0.6% of frame deadlines. Trained-checkpoint checks reproduce identical sampled actions across 1,200 frames.</figcaption>
+        </figure>
+      </section>
 
-      <h2 id="paper-and-releases">Paper and releases</h2>
-      <p>Read the <a href="https://arxiv.org/abs/2610.02144" target="_blank" rel="noopener">arXiv paper</a> or <a href="https://arxiv.org/pdf/2610.02144" target="_blank" rel="noopener">PDF</a> for the complete experiments. The release includes six <a href="https://huggingface.co/collections/frisson-labs/faynt" target="_blank" rel="noopener">model checkpoints</a>: Base, Expert, and Arena at each size, covering pretraining, supervised post-training, and reinforcement learning. The <a href="https://github.com/Na00s/Faynt-Benchmarks" target="_blank" rel="noopener">benchmark repository</a> provides schedules, reported results, and execution tools. The <a href="https://github.com/Na00s/Faynt-Tournament" target="_blank" rel="noopener">tournament repository</a> provides match runners and tournament evaluation.</p>
-      <p>The <a href="https://www.frisson-labs.com/faynt" target="_blank" rel="noopener">Frisson Labs article</a> lets you explore the training curves, gameplay comparisons, and inference measurements interactively.</p>
-
-      <footer class="article-foot">
-        <a href="/#articles">&larr; All articles</a>
-        <a href="https://www.frisson-labs.com/faynt" target="_blank" rel="noopener">Read the Frisson Labs article &rarr;</a>
-      </footer>
+      <section class="faynt-section faynt-release-section" id="releases" aria-labelledby="releases-title">
+        <div class="faynt-prose"><p class="faynt-section-number">06 / Open research</p><h2 id="releases-title">Paper and releases.</h2><p>We release six checkpoints across Base, Expert, and Arena: pretraining, supervised post-training, and reinforcement learning at both sizes. Benchmark suites and tournament tools accompany the weights.</p></div>
+        <nav class="faynt-release-links" aria-label="Paper and releases"><a href="https://arxiv.org/abs/2610.02144" target="_blank" rel="noopener"><span>01</span>arXiv<span aria-hidden="true">↗</span></a><a href="https://arxiv.org/pdf/2610.02144" target="_blank" rel="noopener"><span>02</span>PDF<span aria-hidden="true">↗</span></a><a href="https://huggingface.co/collections/frisson-labs/faynt" target="_blank" rel="noopener"><span>03</span>Models<span aria-hidden="true">↗</span></a><a href="https://github.com/Na00s/Faynt-Benchmarks" target="_blank" rel="noopener"><span>04</span>Benchmarks<span aria-hidden="true">↗</span></a><a href="https://github.com/Na00s/Faynt-Tournament" target="_blank" rel="noopener"><span>05</span>Tournament<span aria-hidden="true">↗</span></a></nav>
+        <div class="faynt-prose faynt-source"><p>Read the <a href="https://www.frisson-labs.com/faynt" target="_blank" rel="noopener">original Frisson Labs article</a> for the complete interactive study.</p><p>Paper: <em>Faynt: Scaling and Optimizing Policies for Competitive Melee</em><br>Ali Janati, Nikita Kuzmin, Rohit Swamy, Charles Niu.</p><a class="faynt-back" href="/#articles">&larr; All articles</a></div>
+      </section>
     </article>
   </main>
 
@@ -148,7 +182,10 @@
 
   <script src="/site.js?v=landscape-4" defer></script>
   <script type="module" src="/sky.js?v=landscape-4"></script>
-  <script src="/navigation.js?v=landscape-4" defer></script>
   <script type="module" src="/backgrounds.js?v=lake-scene-2"></script>
+  <script src="/navigation.js?v=landscape-4" defer></script>
+  <script src="/assets/faynt/data.js" defer></script>
+  <script src="/assets/faynt/curves.js" defer></script>
+  <script src="/articles/faynt/faynt.js?v=visual-1" defer></script>
 </body>
 </html>

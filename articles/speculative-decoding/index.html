@@ -81,7 +81,7 @@
     </header>
 
     <article class="article-body wrap" id="article-introduction">
-      <p>Speculative decoding buys latency with a second, smaller model: the draft model proposes gamma tokens autoregressively, the target model scores all of them in a single forward pass, and an accept-reject rule keeps the longest prefix that the target model agrees with. Done correctly, the output distribution is exactly the target model's; the speedup comes from accepting several tokens per target pass. I implemented it from scratch on the repository's own models, then extended it to the case nobody's tutorial covers: a draft model with a different tokenizer.</p>
+      <p>Speculative decoding buys latency with a second, smaller model: the draft model proposes gamma tokens autoregressively, the target model scores all of them in a single forward pass, and an accept-reject rule keeps the longest prefix that the target model agrees with. Exact speculative decoding preserves the target model's output distribution; the speedup comes from accepting several tokens per target pass. I implemented it from scratch on the repository's own models, then extended it to a draft model with a different tokenizer.</p>
 
       <h2 id="the-accept-reject-core">The accept-reject core</h2>
       <p>For each drafted token, compare the target probability against the draft probability and accept with probability min(1, p_target divided by p_draft). A token drafted with higher confidence than the target would give gets accepted proportionally less often. Acceptance must be a prefix, so a cumulative product turns the per-token accept mask into the accepted run length.</p>
@@ -101,7 +101,7 @@ number_of_accepted_tokens = prefix_mask.sum(dim=1)</code></pre>
         <figcaption class="code-cap" id="code-caption-1">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/speculative_decoding/speculative_decoding.py" target="_blank" rel="noopener">speculative_decoding.py</a></figcaption>
       </figure>
 
-      <p>Batching adds one decision the single-sequence papers skip: different sequences accept different numbers of tokens, but the batch must stay rectangular. This implementation advances every sequence by the batch minimum, conservative but simple, then repairs at the first disagreement point by sampling from the target distribution there, or takes the free bonus token when every draft was accepted.</p>
+      <p>Different sequences accept different numbers of tokens, and the batch must stay rectangular. This implementation advances every sequence by the batch minimum, then repairs at the first disagreement point by sampling from the target distribution there, or takes the free bonus token when every draft was accepted.</p>
       <figure class="code-figure">
         <pre tabindex="0" aria-labelledby="code-caption-2"><code>min_n_accepted = number_of_accepted_tokens.min().item()
 
@@ -118,10 +118,10 @@ else:
     idx = torch.cat((idx, bonus_token), dim=1)</code></pre>
         <figcaption class="code-cap" id="code-caption-2">Condensed from <a href="https://github.com/Na00s/PyTorch-Playground/blob/main/speculative_decoding/speculative_decoding.py" target="_blank" rel="noopener">speculative_decoding.py</a></figcaption>
       </figure>
-      <p>One deliberate simplification to be aware of: at a rejection, the paper resamples from the normalized residual distribution, the positive part of p minus q; this version samples from the target distribution directly, which keeps the code short at the cost of exactness in that branch. The repository keeps an earlier draft of the whole routine in <code>test.py</code>, and comparing the two files is a fair record of how the implementation got refined.</p>
+      <p>At a rejection, the exact algorithm resamples from the normalized residual distribution, the positive part of p minus q. This implementation uses an approximation: it samples from the target distribution directly. The repository keeps an earlier draft of the routine in <code>test.py</code>, so the two files show how the implementation developed.</p>
 
       <h2 id="universal-assisted-generation-drafting-across-tokenizers">Universal Assisted Generation: drafting across tokenizers</h2>
-      <p>Standard speculative decoding assumes draft and target share a vocabulary. The more useful case is often the opposite: the fast model you have does not speak the target's token space. Universal Assisted Generation bridges it through text. Decode the current sequence to a string, re-encode with the draft tokenizer, draft gamma tokens, decode the drafted snippet back to text, re-encode into the target vocabulary, and verify as usual.</p>
+      <p>Standard speculative decoding uses a shared vocabulary for draft and target. Universal Assisted Generation supports different tokenizers by translating through text. Decode the current sequence to a string, re-encode with the draft tokenizer, draft gamma tokens, decode the drafted snippet back to text, re-encode into the target vocabulary, and verify as usual.</p>
       <figure class="code-figure">
         <pre tabindex="0" aria-labelledby="code-caption-3"><code>def universal_speculative_decode(
     target_model, target_decode, target_encode,
@@ -134,7 +134,7 @@ else:
     """</code></pre>
         <figcaption class="code-cap" id="code-caption-3"><a href="https://github.com/Na00s/PyTorch-Playground/blob/main/speculative_decoding/speculative_decoding.py" target="_blank" rel="noopener">speculative_decoding.py</a></figcaption>
       </figure>
-      <p>The costs are real and worth stating. Re-tokenization can split the drafted text into a different number of target tokens, so the batch truncates to the shortest re-encoding; and getting a draft probability for a target-space token requires walking the draft model along its own tokenization of the same text, token by token. Tokenizations do not always align one-to-one, and the code says so in a comment where the alignment is resolved by taking the first token. The acceptance mathematics is unchanged; everything hard about UAG lives in the translation layer.</p>
+      <p>Re-tokenization can split the drafted text into a different number of target tokens, so the batch truncates to the shortest re-encoding. Getting a draft probability for a target-space token requires walking the draft model along its own tokenization of the same text, token by token. When the tokenizations produce different spans, this implementation resolves the alignment by taking the first token. The translation layer handles these differences before verification.</p>
 
       <h2 id="training-the-draft-to-agree">Training the draft to agree</h2>
       <p>Acceptance rate is the whole game: every rejection wastes drafted tokens. The file includes a temperature-scaled KL-divergence loss module for distilling a draft model toward the target's distributions, softmax against log-softmax with <code>log_target=True</code> and the usual batchmean reduction. A draft model distilled on the target's outputs accepts longer prefixes, which is what turns the mathematics above into wall-clock speedup.</p>
