@@ -18,16 +18,16 @@
   .content-section .project { display: block; }
 }
 
-/* Soft blue structure with warm peach movement across every content figure. */
+/* Soft blue figures use peach in light mode and royal blue in dark mode. */
 .pub-fig {
   --figure-line: #7396bd;
   --figure-secondary: #a3b3c5;
   --figure-accent: #d98e68;
 }
 [data-theme="dark"] .pub-fig {
-  --figure-line: #95b9dd;
-  --figure-secondary: #7189a3;
-  --figure-accent: #edb08f;
+  --figure-line: #a9c2ff;
+  --figure-secondary: #748fcd;
+  --figure-accent: #6f95ff;
 }
 .pub-fig .ink,
 .pub-fig .hot { stroke: var(--figure-line); }

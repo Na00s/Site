@@ -16,7 +16,7 @@
 
 /* Clear title links and compact outlined resource buttons. */
 .content-section{--content-link:#9e4e32;--content-link-hover:#74351f;--button-line:#bd8d74;--button-hover:#f3e5da;--title-link:#648bba;--title-hover:#466f9f}
-[data-theme=dark] .content-section{--content-link:#edb08f;--content-link-hover:#ffd2b4;--button-line:#9a6547;--button-hover:#3b2c23;--title-link:#b0d0f0;--title-hover:#d5e8fa}
+[data-theme=dark] .content-section{--content-link:#a9c2ff;--content-link-hover:#d5e2ff;--button-line:#5d7ed3;--button-hover:#182b61;--title-link:#a9c2ff;--title-hover:#d5e2ff}
 .content-section h3 a{color:var(--title-link);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.15em;text-decoration-color:color-mix(in srgb,currentColor 55%,transparent);cursor:pointer;transition:color .15s,text-decoration-color .15s}
 .content-section h3 a:hover,.content-section h3 a:focus-visible{color:var(--title-hover);text-decoration-color:currentColor;text-decoration-thickness:2px}
 .content-section h3 a:focus-visible{outline-color:var(--title-hover)}
