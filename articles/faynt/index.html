@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Faynt: learning competitive Melee with one policy for 26 characters · Ali Janati</title>
+  <meta name="description" content="A walkthrough of our Faynt research: learning from human Melee replays, refining policies with curricula, distillation and reinforcement learning, and running at 60 Hz.">
+  <link rel="canonical" href="https://alijanati.com/articles/faynt/">
+  <meta name="author" content="Ali Janati">
+  <meta name="theme-color" content="#f6f1e6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#191410" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://alijanati.com/articles/faynt/">
+  <meta property="og:title" content="Faynt: learning competitive Melee with one policy for 26 characters">
+  <meta property="og:description" content="How 10M- and 75M-parameter policies learn competitive Melee through imitation, distillation, and reinforcement learning, with one checkpoint for all 26 characters.">
+  <meta property="og:image" content="https://alijanati.com/assets/images/og-fuji-v1.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:alt" content="Ali Janati. Research in deep learning, against a Mount Fuji landscape.">
+  <link rel="icon" href="/favicon.ico?v=fuji-icon-1" sizes="16x16 32x32 48x48">
+  <link rel="icon" href="/assets/images/favicon.svg?v=fuji-icon-1" type="image/svg+xml" sizes="any">
+  <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png?v=fuji-icon-1" sizes="180x180">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("reference-theme");
+        if (!t) t = "light";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preload" href="/assets/serif.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/mono.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/site.css?v=blue-section-headings-1">
+  <link rel="stylesheet" href="/article.css?v=article-scenes-1">
+  <link rel="stylesheet" href="/navigation.css?v=landscape-4">
+</head>
+<body class="article-page" data-article-background="hills">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-head" id="top">
+    <div class="wrap bar">
+      <a class="wordmark" href="/">Ali Janati<span class="dot">.</span></a>
+      <nav class="site-nav" id="site-nav" aria-label="Site">
+        <a href="/#papers">Papers</a>
+        <a href="/#articles">Articles</a>
+        <a href="/#open-source">Open source</a>
+        <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Light / dark">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 2v14a7 7 0 0 1 0-14z" fill="currentColor"/></svg>
+        </button>
+      </nav>
+      <button class="menu-toggle" type="button" aria-label="Navigation menu" aria-expanded="false" aria-controls="site-nav" data-preview-ui><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h7"/></svg></button>
+    </div>
+  </header>
+
+  <nav class="side-toc" aria-label="Contents" data-preview-ui inert>
+      <a href="#training-and-architecture" aria-label="Training and architecture"><span>Training and architecture</span></a>
+      <a href="#curriculum-and-distillation" aria-label="Curriculum and distillation"><span>Curriculum and distillation</span></a>
+      <a href="#learning-through-play" aria-label="Learning through play"><span>Learning through play</span></a>
+      <a href="#reading-the-gameplay-results" aria-label="Reading the gameplay results"><span>Reading the gameplay results</span></a>
+      <a href="#one-decision-per-frame" aria-label="One decision per frame"><span>One decision per frame</span></a>
+      <a href="#paper-and-releases" aria-label="Paper and releases"><span>Paper and releases</span></a>
+  </nav>
+
+  <main id="main" class="article-main">
+    <header class="article-head cover" aria-labelledby="cover-title" data-sky-mode="day">
+      <div id="sky-scene" aria-hidden="true"></div>
+      <div class="cover-words">
+        <p class="crumbs" data-sky-shelter="date"><a href="/#articles">Articles</a> / Faynt</p>
+        <h1 id="cover-title" data-sky-shelter="title">Faynt: learning competitive Melee with one policy for 26 characters</h1>
+        <p class="meta">Oct 2026 &middot; Research article: <a href="https://www.frisson-labs.com/faynt" target="_blank" rel="noopener">Faynt at Frisson Labs</a> &middot; By Ali Janati and Nikita Kuzmin, with advisory contributions from Rohit Swamy and Charles Niu</p>
+        <nav class="cover-index" aria-label="Contents" data-sky-shelter="index" data-preview-ui>
+          <a class="cover-index-row" href="#training-and-architecture"><span class="index-number">[1]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Training and architecture</span></a>
+          <a class="cover-index-row" href="#curriculum-and-distillation"><span class="index-number">[2]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Curriculum and distillation</span></a>
+          <a class="cover-index-row" href="#learning-through-play"><span class="index-number">[3]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Learning through play</span></a>
+          <a class="cover-index-row" href="#reading-the-gameplay-results"><span class="index-number">[4]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Reading the gameplay results</span></a>
+          <a class="cover-index-row" href="#one-decision-per-frame"><span class="index-number">[5]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>One decision per frame</span></a>
+          <a class="cover-index-row" href="#paper-and-releases"><span class="index-number">[6]</span><span class="index-leader" aria-hidden="true">................................................................................................................................................................</span><span>Paper and releases</span></a>
+        </nav>
+      </div>
+      <div class="sky-modes" role="group" aria-label="Sky appearance" data-preview-ui>
+        <button type="button" data-sky-mode="day" aria-label="Day" aria-pressed="true"></button>
+        <button type="button" data-sky-mode="night" aria-label="Night" aria-pressed="false"></button>
+        <button type="button" data-sky-mode="dawn" aria-label="Dawn" aria-pressed="false"></button>
+      </div>
+    </header>
+
+    <article class="article-body wrap" id="article-introduction">
+      <p><a href="https://www.frisson-labs.com/faynt" target="_blank" rel="noopener">Faynt</a> is our study of learning competitive Super Smash Bros. Melee from human replays and gameplay. We train two Transformer policies, with 10M and 75M parameters, each controlling all 26 characters through one checkpoint. The work follows the full path from predicting a human controller input to choosing actions that win games, then making those decisions within a single frame.</p>
+      <p>The <a href="https://arxiv.org/abs/2610.02144" target="_blank" rel="noopener">paper</a>, by Ali Janati, Nikita Kuzmin, Rohit Swamy, and Charles Niu, brings together the architecture, training experiments, gameplay evaluations, and inference measurements. This walkthrough follows the main decisions along that path.</p>
+
+      <h2 id="training-and-architecture">Training and architecture</h2>
+      <p>A policy reads structured game state: the fighters, their positions and actions, the stage, and recent controller inputs. It predicts the next controller command. Training windows span 256 frames, about 4.3 seconds at Melee's 60 Hz. That history gives the model information about how a situation developed before it chooses the next input.</p>
+      <p>The dataset contains 839,942 accepted human replays and approximately 17.48 billion training targets. We split by complete game, keeping both players' perspectives together, so validation measures prediction on separate games. Pretraining uses behavioral cloning: increase the probability of the command the human player actually chose.</p>
+      <table>
+        <caption>Two model sizes, with a shared 256-frame context</caption>
+        <thead>
+          <tr><th scope="col">Configuration</th><th scope="col">10M</th><th scope="col">75M</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Transformer blocks</th><td>5</td><td>11</td></tr>
+          <tr><th scope="row">Hidden width</th><td>384</td><td>768</td></tr>
+          <tr><th scope="row">Query / key-value heads</th><td>6 / 2</td><td>12 / 3</td></tr>
+          <tr><th scope="row">Feed-forward width</th><td>768</td><td>1,920</td></tr>
+        </tbody>
+      </table>
+      <p>The backbone uses grouped-query attention and Full Attention Residuals, which learn how to combine earlier representations. Model-size and optimizer sweeps, together with measured throughput, guide the pretraining budgets. We use Muon for hidden backbone matrices and AdamW for the remaining parameters. The paper evaluates the resulting recipe; individual architecture components would need further controlled experiments to establish their contribution to playing strength.</p>
+
+      <h2 id="curriculum-and-distillation">Curriculum and distillation</h2>
+      <p>The replay collection includes players of different skill levels and both sides of each match. Supervised post-training changes which demonstrations the policies see. The curriculum moves from the natural replay distribution toward winning play, then toward winners in the Master and Diamond ranks.</p>
+      <p>This also changes how we select checkpoints. We track a weighted prediction loss: 90% Master-winning loss plus 10% Diamond-winning loss. Later training uses approximately the same proportions of replay visits. Overall validation loss remains useful for tracking the broader distribution, while the weighted score follows the behavior emphasized by this stage.</p>
+      <p>The 10M policy then learns from the 75M teacher. Distillation gives equal weight to predicting the recorded human action and matching the teacher's probability distribution over commands. That distribution supplies information about plausible alternatives at each frame. Two rounds, with a lower learning rate in the second, reduce the 10M weighted loss from 0.76443 to 0.75746.</p>
+      <p>Gameplay provides a separate check. Across the same 152-game schedule, supervised post-training raises 10M wins from 49 to 106 and 75M wins from 69 to 123. The supervised 10M outperforms the pretrained 75M despite its higher overall prediction loss. The weighted score agrees with the win-rate ordering of these four checkpoints, a useful observation whose scope is this evaluated set.</p>
+
+      <h2 id="learning-through-play">Learning through play</h2>
+      <p>Reinforcement learning continues from the supervised checkpoints using proximal policy optimization, or PPO. Both policies train in Fox mirror matches across six stages. Rewards include taking stocks and dealing damage, alongside movement, offstage, and ledge terms. Penalties on changes in action probabilities help keep updates controlled and preserve a connection to the supervised policy.</p>
+      <p>The 10M receives a second run using full self-play, with a longer reward horizon and several changes to the objective. Extending the reward half-life from four to eight seconds gives later consequences more weight. These settings change together, and the two model sizes have different training histories, so their final scores reflect the complete training paths.</p>
+
+      <h2 id="reading-the-gameplay-results">Reading the gameplay results</h2>
+      <p>The final 10M wins 240 of 244 same-character games against fourteen Slippi-AI releases on their supported characters. Those opponents retain 21- or 24-frame action delays, while Faynt uses zero added delay. The evaluation leaves the contribution of that timing difference unresolved.</p>
+      <p>A separate comparison uses one privately supplied Slippi-AI checkpoint with zero added delay, under Master Player and Cody conditioning. The final 10M wins all 68 games; the 75M wins 58. These results describe that opponent and schedule. Only Fox receives reinforcement-learning experience, while all 26 characters share the updated weights and appear in the expanded evaluation.</p>
+
+      <h2 id="one-decision-per-frame">One decision per frame</h2>
+      <p>Melee allows about 16.67 milliseconds per frame. The standard PyTorch path spends substantial time launching small operations and reading cache bookkeeping back to the host. Keeping that bookkeeping on the GPU and replaying most of the policy step through a CUDA graph cuts this overhead.</p>
+      <p>On recorded game inputs, optimized T4 inference averages 5.2 ms for 10M and 8.7 ms for 75M, with 99th-percentile latencies of 6.8 and 12.1 ms. The timings use random weights and include feature conversion, sampling, and command decoding; emulator execution and communication are excluded. Late decisions still occur, including 0.6% for T4/75M. A separate check with trained checkpoints reproduces the same sampled actions across 1,200 frames.</p>
+
+      <h2 id="paper-and-releases">Paper and releases</h2>
+      <p>Read the <a href="https://arxiv.org/abs/2610.02144" target="_blank" rel="noopener">arXiv paper</a> or <a href="https://arxiv.org/pdf/2610.02144" target="_blank" rel="noopener">PDF</a> for the complete experiments. The release includes six <a href="https://huggingface.co/collections/frisson-labs/faynt" target="_blank" rel="noopener">model checkpoints</a>: Base, Expert, and Arena at each size, covering pretraining, supervised post-training, and reinforcement learning. The <a href="https://github.com/Na00s/Faynt-Benchmarks" target="_blank" rel="noopener">benchmark repository</a> provides schedules, reported results, and execution tools. The <a href="https://github.com/Na00s/Faynt-Tournament" target="_blank" rel="noopener">tournament repository</a> provides match runners and tournament evaluation.</p>
+      <p>The <a href="https://www.frisson-labs.com/faynt" target="_blank" rel="noopener">Frisson Labs article</a> lets you explore the training curves, gameplay comparisons, and inference measurements interactively.</p>
+
+      <footer class="article-foot">
+        <a href="/#articles">&larr; All articles</a>
+        <a href="https://www.frisson-labs.com/faynt" target="_blank" rel="noopener">Read the Frisson Labs article &rarr;</a>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <div class="colophon">
+        <span>&copy; 2026 Ali Janati</span>
+        <span><a href="/">alijanati.com</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/site.js?v=landscape-4" defer></script>
+  <script type="module" src="/sky.js?v=landscape-4"></script>
+  <script src="/navigation.js?v=landscape-4" defer></script>
+  <script type="module" src="/backgrounds.js?v=lake-scene-2"></script>
+</body>
+</html>

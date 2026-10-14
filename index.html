@@ -144,6 +144,10 @@
       <ul>
         <li>
           <span class="when">Oct 2026</span>
+          <span class="what">New <a href="https://arxiv.org/abs/2610.02144" target="_blank" rel="noopener">Faynt paper</a> and <a href="/articles/faynt/">article</a> on training compact Transformer policies to play all 26 characters in competitive Melee, from human replays through distillation and reinforcement learning.</span>
+        </li>
+        <li>
+          <span class="when">Oct 2026</span>
           <span class="what">Our <a href="https://arxiv.org/abs/2608.07890" target="_blank" rel="noopener">paper on router sensitivity for expert pruning</a> was accepted to <a href="https://axiom-neurips2026.github.io/" target="_blank" rel="noopener"><strong>NeurIPS 2026 - AXIOM Workshop</strong></a>. The revised paper is now available, with experiments on lightweight adaptation and the accuracy-compression tradeoff.</span>
         </li>
         <li>
@@ -181,6 +185,31 @@
           <h2>Papers.</h2>
 
           <ul class="pubs">
+            <li class="pub" id="faynt">
+              <div class="pub-fig" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <path class="ink" d="M30 28h32c9 0 14 7 17 18l5 18c2 9-7 14-13 8L59 60H33L21 72c-6 6-15 1-13-8l5-18c3-11 8-18 17-18z"/>
+                  <path class="hot" d="M28 37v18M19 46h18"/>
+                  <circle class="hot-fill" cx="63" cy="40" r="3.5"/>
+                  <circle class="hot-fill" cx="72" cy="49" r="3.5"/>
+                  <path class="ink-faint" d="M39 52h14"/>
+                </svg>
+              </div>
+              <div>
+                <h3><a href="https://arxiv.org/abs/2610.02144" target="_blank" rel="noopener">Faynt: Scaling and Optimizing Policies for Competitive Melee</a></h3>
+                <p class="authors"><strong class="me">Ali Janati</strong>, Nikita Kuzmin, Rohit Swamy, Charles Niu</p>
+                <p class="venue">arXiv &middot; Oct 2026</p>
+                <p class="gloss">A family of 10M- and 75M-parameter Transformer policies that play all 26 characters in Super Smash Bros. Melee. We study scaling, optimization, curricula, distillation, and reinforcement learning, with open model weights, benchmark suites, and tournament tools.</p>
+                <ul class="chips">
+                  <li><a href="https://arxiv.org/abs/2610.02144" target="_blank" rel="noopener">arXiv</a></li>
+                  <li><a href="https://arxiv.org/pdf/2610.02144" target="_blank" rel="noopener">PDF</a></li>
+                  <li><a href="https://huggingface.co/collections/frisson-labs/faynt" target="_blank" rel="noopener">Models</a></li>
+                  <li><a href="https://github.com/Na00s/Faynt-Benchmarks" target="_blank" rel="noopener">Benchmarks</a></li>
+                  <li><a href="https://github.com/Na00s/Faynt-Tournament" target="_blank" rel="noopener">Tournament</a></li>
+                </ul>
+              </div>
+            </li>
+
             <li class="pub" id="router-sensitivity">
               <div class="pub-fig" aria-hidden="true">
                 <svg viewBox="0 0 92 92">
@@ -206,7 +235,6 @@
                   <li><a href="https://arxiv.org/pdf/2608.07890" target="_blank" rel="noopener">PDF</a></li>
                   <li><a href="https://github.com/ianKa1/MoE_pruning" target="_blank" rel="noopener">Code</a></li>
                   <li><a href="#moe-models">Models</a></li>
-                  <li><a href="/assets/docs/router-sensitivity.bib" download>BibTeX</a></li>
                 </ul>
               </div>
             </li>
@@ -296,6 +324,24 @@
           <p class="lede">Write-ups on deep learning: architectures from scratch, training methods, and inference optimization, among other things.</p>
 
           <ul class="articles">
+            <li class="article-row">
+              <div class="pub-fig content-fig" data-figure="faynt-training" data-figure-label="Learning a shared policy across characters" aria-hidden="true">
+                <svg viewBox="0 0 92 92">
+                  <path class="ink-faint" d="M16 20h20M16 46h20M16 72h20"/>
+                  <path class="hot" d="M36 20 50 46M36 46h14M36 72 50 46M64 46h16"/>
+                  <circle class="ink" cx="12" cy="20" r="4"/>
+                  <circle class="ink" cx="12" cy="46" r="4"/>
+                  <circle class="ink" cx="12" cy="72" r="4"/>
+                  <rect class="ink" x="50" y="34" width="14" height="24" rx="3"/>
+                  <circle class="hot-fill" cx="80" cy="46" r="4"/>
+                </svg>
+              </div>
+              <div class="article-copy">
+                <span class="when">Oct 2026</span>
+                <h3><a href="/articles/faynt/">Faynt: learning competitive Melee with one policy for 26 characters</a></h3>
+                <p class="sum">A walk through our Faynt research: learning from human replays, refining a policy with winning demonstrations and distillation, improving it through self-play, and fitting inference inside a game frame.</p>
+              </div>
+            </li>
             <li class="article-row">
               <div class="pub-fig content-fig" data-figure="throughput-steps" data-figure-label="Training throughput across optimization stages" aria-hidden="true">
                 <svg viewBox="0 0 92 92">
