@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Faynt: Scaling and Optimizing Policies for Competitive Melee</title>
+  <meta name="description" content="Faynt: Scaling and Optimizing Policies for Competitive Melee. Ali Janati, Nikita Kuzmin, Rohit Swamy, Charles Niu. Author-hosted preprint, abstract, and full PDF.">
+  <link rel="canonical" href="https://alijanati.com/papers/faynt/">
+  <meta name="citation_title" content="Faynt: Scaling and Optimizing Policies for Competitive Melee">
+  <meta name="citation_author" content="Ali Janati">
+  <meta name="citation_author" content="Nikita Kuzmin">
+  <meta name="citation_author" content="Rohit Swamy">
+  <meta name="citation_author" content="Charles Niu">
+  <meta name="citation_publication_date" content="2026/10/01">
+  <meta name="citation_arxiv_id" content="2610.02144">
+  <meta name="citation_pdf_url" content="https://alijanati.com/papers/faynt/faynt-arxiv-2610.02144v1.pdf">
+  <meta name="citation_abstract_html_url" content="https://alijanati.com/papers/faynt/">
+  <meta name="citation_language" content="en">
+  <meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#060b1d" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://alijanati.com/papers/faynt/">
+  <meta property="og:title" content="Faynt: Scaling and Optimizing Policies for Competitive Melee">
+  <meta property="og:description" content="Ali Janati, Nikita Kuzmin, Rohit Swamy, Charles Niu. Preprint, October 1, 2026. Read the abstract and full paper.">
+  <link rel="icon" href="/assets/images/favicon.svg?v=fuji-icon-1" type="image/svg+xml">
+  <script>
+    (function () {
+      try { document.documentElement.setAttribute("data-theme", localStorage.getItem("reference-theme") || "light"); } catch (e) {}
+    })();
+  </script>
+  <link rel="preload" href="/assets/serif.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/site.css?v=navy-dark-2">
+  <link rel="stylesheet" href="/navigation.css?v=landscape-4">
+  <style>
+    .paper-main{width:calc(100% - 48px);max-width:760px;margin:0 auto;padding:112px 0 64px}
+    .paper-kicker{margin:0 0 20px;font-family:var(--sans);font-size:13px;color:var(--muted)}
+    .paper-main h1{font-size:clamp(30px,4.6vw,44px);font-weight:500;line-height:1.15;margin:0 0 20px;letter-spacing:-.025em}
+    .paper-authors{font-family:var(--sans);font-size:16px;line-height:1.65;margin:0 0 10px}
+    .paper-date{font-family:var(--sans);font-size:13px;color:var(--muted);margin:0}
+    .paper-links{display:flex;flex-wrap:wrap;gap:12px 24px;margin:24px 0 32px;font-family:var(--sans);font-size:14px}
+    .paper-main a{text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--faint)}
+    .paper-links a:first-child{font-weight:600}
+    .paper-main h2{font-size:25px;line-height:1.3;margin:0 0 16px}
+    .paper-abstract p{margin:0;font-size:17px;line-height:1.65}
+    .paper-version{margin-top:32px;padding-top:24px;border-top:1px solid var(--line);font-family:var(--sans);font-size:13px;line-height:1.7;color:var(--muted)}
+    .paper-version p{margin:0 0 12px}
+    .paper-version p:last-child{margin-bottom:0}
+    @media(max-width:600px){.paper-main{padding-top:96px}.paper-main h1{font-size:32px}.paper-authors{font-size:15px}.paper-links{gap:12px 20px}}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-head" id="top">
+    <div class="wrap bar">
+      <a class="wordmark" href="/">Ali Janati<span class="dot">.</span></a>
+      <nav class="site-nav" id="site-nav" aria-label="Site">
+        <a href="/#papers">Papers</a>
+        <a href="/#articles">Articles</a>
+        <a href="/#open-source">Open source</a>
+        <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Light / dark">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 2v14a7 7 0 0 1 0-14z" fill="currentColor"/></svg>
+        </button>
+      </nav>
+      <button class="menu-toggle" type="button" aria-label="Navigation menu" aria-expanded="false" aria-controls="site-nav" data-preview-ui><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h7"/></svg></button>
+    </div>
+  </header>
+
+
+  <main id="main" class="paper-main">
+    <article aria-labelledby="paper-title">
+      <header>
+        <p class="paper-kicker"><a href="/#papers">Papers</a> / Preprint</p>
+        <h1 id="paper-title">Faynt: Scaling and Optimizing Policies for Competitive Melee</h1>
+        <p class="paper-authors">Ali Janati, Nikita Kuzmin, Rohit Swamy, Charles Niu</p>
+        <p class="paper-date"><time datetime="2026-10-01">October 1, 2026</time> · arXiv:2610.02144v1 · 54 pages</p>
+        <nav class="paper-links" aria-label="Paper resources">
+          <a href="/papers/faynt/faynt-arxiv-2610.02144v1.pdf">Read PDF (1.05 MB)</a>
+          <a href="https://arxiv.org/abs/2610.02144">arXiv record</a>
+          <a href="/articles/faynt/">Research walkthrough</a>
+        </nav>
+      </header>
+      <section class="paper-abstract" aria-labelledby="abstract-title">
+        <h2 id="abstract-title">Abstract</h2>
+        <p>We introduce Faynt, a family of 10M- and 75M-parameter Transformer policies for Super Smash Bros. Melee, each controlling all 26 characters with a single checkpoint. After reinforcement learning (RL), the 10M wins 240 of 244 same-character games (98.4%) against fourteen specialist and multi-character releases on their supported rosters, with a winning record against every release. These opponents retain 21- or 24-frame action delays; Faynt uses no added delay, and we have not isolated the effect of this difference. In a separate evaluation against a privately supplied zero-delay Slippi-AI model, the 10M wins all 68 games across two conditioning settings. We study architecture, optimization, scaling, and hyperparameter transfer to guide pretraining on approximately 840,000 human replays. Post-training combines rank- and outcome-based curricula, 75M-to-10M distillation, and RL restricted to Fox mirror matches. On the initial 152-game benchmark, the supervised 10M wins 69.7% of games, compared with 45.4% for the pretrained 75M, despite higher overall held-out controller-prediction loss. The weighted validation loss used for supervised checkpoint selection agrees with the win-rate ordering of all four pretrained and supervised policies. After supervised post-training, both models take less damage per minute, build larger early leads, and win more often after losing the first life. Optimized inference on recorded game states averages 5.2 ms per decision for the 10M and 8.7 ms for the 75M on an NVIDIA T4, excluding emulator execution and communication. We open-source the weights, both benchmark suites, and a platform for automated model tournaments.</p>
+      </section>
+      <footer class="paper-version">
+        <p>Author-hosted copy of <a href="https://arxiv.org/abs/2610.02144v1">arXiv:2610.02144v1</a>, submitted October 1, 2026. The PDF is an unmodified copy of that version, including all references and appendices.</p>
+        <p>Cite as: Ali Janati, Nikita Kuzmin, Rohit Swamy, and Charles Niu. 2026. <em>Faynt: Scaling and Optimizing Policies for Competitive Melee.</em> arXiv:2610.02144.</p>
+      </footer>
+    </article>
+  </main>
+  <script src="/site.js?v=dark-default-1"></script>
+</body>
+</html>

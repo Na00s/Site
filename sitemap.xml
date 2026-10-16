@@ -2,11 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://alijanati.com/</loc>
-    <lastmod>2026-10-14</lastmod>
+    <lastmod>2026-10-16</lastmod>
   </url>
   <url>
     <loc>https://alijanati.com/articles/faynt/</loc>
-    <lastmod>2026-10-14</lastmod>
+    <lastmod>2026-10-16</lastmod>
   </url>
   <url>
     <loc>https://alijanati.com/articles/qwen3-next-80b-a3b/</loc>
@@ -31,5 +31,13 @@
   <url>
     <loc>https://alijanati.com/articles/transformer-optimization-101/</loc>
     <lastmod>2026-10-14</lastmod>
+  </url>
+  <url>
+    <loc>https://alijanati.com/papers/faynt/</loc>
+    <lastmod>2026-10-16</lastmod>
+  </url>
+  <url>
+    <loc>https://alijanati.com/papers/faynt/faynt-arxiv-2610.02144v1.pdf</loc>
+    <lastmod>2026-10-01</lastmod>
   </url>
 </urlset>
